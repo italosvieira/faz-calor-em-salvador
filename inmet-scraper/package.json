@@ -1,0 +1,22 @@
+{
+  "name": "inmet-scraper",
+  "version": "0.0.1",
+  "license": "MIT",
+  "description": "Data scraper do INMET(Instituto Nacional de Metereologia).",
+  "main": "src/index.js",
+  "author": {
+    "name": "Ítalo Da Silva Vieira",
+    "email": "italo.vieira.dev@gmail.com"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cheerio": "1.0.0-rc.3",
+    "moment": "2.24.0",
+    "pg": "7.12.1",
+    "request": "2.88.0",
+    "request-promise": "4.2.4",
+    "winston": "3.2.1"
+  }
+}
