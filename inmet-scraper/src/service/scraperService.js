@@ -1,4 +1,4 @@
-const logger = require('./config/winston')
+const logger = require('../config/winston')
 const request = require('request-promise')
 const cheerio = require('cheerio')
 const moment = require('moment')
