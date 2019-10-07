@@ -1,3 +1,4 @@
 node_modules/
 .idea/
 inmet-scraper/inmet-scraper.iml
+*.log
