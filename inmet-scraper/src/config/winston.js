@@ -1,4 +1,5 @@
 const winston = require('winston')
+const moment = require('moment')
 
 module.exports = winston.createLogger({
   level: 'info',
@@ -13,5 +14,8 @@ module.exports = winston.createLogger({
       return stack ? `[${timestamp}] ${level}: ${message} \n ${stack}` : `[${timestamp}] ${level}: ${message}`
     })
   ),
-  transports: [ new winston.transports.Console() ]
+  transports: [
+    new (winston.transports.File)({ filename: moment().format('DD-MM-YYYY').toString() + '_log.log', level: 'info'}),
+    new (winston.transports.Console)
+  ]
 })
