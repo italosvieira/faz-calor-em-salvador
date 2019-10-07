@@ -1,0 +1,1 @@
+CREATE DATABASE faz_calor_em_salvador;
