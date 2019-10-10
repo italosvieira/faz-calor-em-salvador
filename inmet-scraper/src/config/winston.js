@@ -15,7 +15,7 @@ module.exports = winston.createLogger({
     })
   ),
   transports: [
-    new (winston.transports.File)({ filename: 'InmetScraper-' + moment().format('DD-MM-YYYY').toString() + '.log', level: 'info'}),
+    new (winston.transports.File)({ filename: 'logs/InmetScraper-' + moment().format('DD-MM-YYYY').toString() + '.log', level: 'info'}),
     new (winston.transports.Console)
   ]
 })
