@@ -50,13 +50,14 @@ function popularObjetoEstacao($, convencional) {
 module.exports = async function(url, dataIni, dataFim, estacao, convencional) {
   logger.info(estacao + 'Iniciando coleta de dados.')
 
+  const formatoData = 'DD/MM/YYYY'
   let body, $, aleaValue, xaleaValue, xID, aleaNum
 
-  if (!moment(dataIni, 'DD/MM/YYYY').isValid()) {
+  if (!moment(dataIni, formatoData).isValid()) {
     throw new Error(estacao + 'Data início passada como parâmetro inválida. Data Início: ' + dataIni)
   }
 
-  if (!moment(dataFim, 'DD/MM/YYYY').isValid()) {
+  if (!moment(dataFim, formatoData).isValid()) {
     throw new Error(estacao + 'Data fim passada como parâmetro inválida. Data Fim: ' + dataFim)
   }
 

@@ -1,4 +1,4 @@
-const service = require('./service/estacaoService')
+const service = require('./services/estacaoService')
 
 async function start () {
   await service.inicializarAplicacao()
