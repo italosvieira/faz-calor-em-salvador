@@ -2,19 +2,20 @@ CREATE TABLE estacao_convencional_salvador (
     id                 BIGSERIAL PRIMARY KEY,
     data_medicao       DATE NOT NULL,
     hora_medicao       VARCHAR(2) NOT NULL,
-    temperatura        NUMERIC(3,2) NOT NULL,
-    temperatura_max    NUMERIC(3,2),
-    temperatura_min    NUMERIC(3,2),
-    umidade            INTEGER,
-    pressao            NUMERIC(5,2),
-    vento_velocidade   NUMERIC(3,2),
+    temperatura        NUMERIC(15,5) NOT NULL,
+    temperatura_max    NUMERIC(15,5),
+    temperatura_min    NUMERIC(15,5),
+    umidade            VARCHAR(3),
+    pressao            NUMERIC(15,5),
+    vento_velocidade   NUMERIC(15,5),
     vento_direcao      INTEGER,
     nebulosidade       INTEGER,
-    insolacao           NUMERIC(4,2),
-    precipitacao       NUMERIC(6,2)
+    insolacao          NUMERIC(15,5),
+    precipitacao       NUMERIC(15,5),
+    UNIQUE(data_medicao, hora_medicao)
 );
 
-CREATE INDEX ON estacao_convencional_salvador ((max(data_medicao)));
+CREATE INDEX ON estacao_convencional_salvador (data_medicao DESC);
 
 comment on column estacao_convencional_salvador.id is 'Identificador do registro gerado automaticamente.';
 comment on column estacao_convencional_salvador.data_medicao is 'Data de quando foi medido os dados do registro. No formato DD/MM/YYYY';

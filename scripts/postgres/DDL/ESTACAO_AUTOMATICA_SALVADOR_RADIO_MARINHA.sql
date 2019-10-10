@@ -2,26 +2,27 @@ CREATE TABLE estacao_automatica_salvador_radio_marinha (
     id                 BIGSERIAL PRIMARY KEY,
     data_medicao       DATE NOT NULL,
     hora_medicao       VARCHAR(2) NOT NULL,
-    temperatura_inst   NUMERIC(3,2) NOT NULL,
-    temperatura_max    NUMERIC(3,2),
-    temperatura_min    NUMERIC(3,2),
-    umidade_inst       INTEGER,
-    umidade_max        INTEGER,
-    umidade_min        INTEGER,
-    pto_orvalho_inst   NUMERIC(3,2),
-    pto_orvalho_max    NUMERIC(3,2),
-    pto_orvalho_min    NUMERIC(3,2),
-    pressao_inst       NUMERIC(5,2),
-    pressao_max        NUMERIC(5,2),
-    pressao_min        NUMERIC(5,2),
-    vento_velocidade   NUMERIC(3,2),
+    temperatura_inst   NUMERIC(15,5) NOT NULL,
+    temperatura_max    NUMERIC(15,5),
+    temperatura_min    NUMERIC(15,5),
+    umidade_inst       VARCHAR(3),
+    umidade_max        VARCHAR(3),
+    umidade_min        VARCHAR(3),
+    pto_orvalho_inst   NUMERIC(15,5),
+    pto_orvalho_max    NUMERIC(15,5),
+    pto_orvalho_min    NUMERIC(15,5),
+    pressao_inst       NUMERIC(15,5),
+    pressao_max        NUMERIC(15,5),
+    pressao_min        NUMERIC(15,5),
+    vento_velocidade   NUMERIC(15,5),
     vento_direcao      INTEGER,
-    vento_rajada       NUMERIC(3,2),
-    radiacao           NUMERIC(6,2),
-    precipitacao       NUMERIC(6,2)
+    vento_rajada       NUMERIC(15,5),
+    radiacao           NUMERIC(15,5),
+    precipitacao       NUMERIC(15,5),
+    UNIQUE(data_medicao, hora_medicao)
 );
 
-CREATE INDEX ON estacao_automatica_salvador_radio_marinha ((max(data_medicao)));
+CREATE INDEX ON estacao_automatica_salvador_radio_marinha (data_medicao DESC);
 
 comment on column estacao_automatica_salvador_radio_marinha.id is 'Identificador do registro gerado automaticamente.';
 comment on column estacao_automatica_salvador_radio_marinha.data_medicao is 'Data de quando foi medido os dados do registro. No formato DD/MM/YYYY';
