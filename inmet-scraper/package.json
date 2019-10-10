@@ -9,7 +9,7 @@
     "email": "italo.vieira.dev@gmail.com"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/index.js"
   },
   "dependencies": {
     "cheerio": "1.0.0-rc.3",
