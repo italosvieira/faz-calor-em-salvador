@@ -3,8 +3,8 @@ const request = require('request-promise')
 const cheerio = require('cheerio')
 const moment = require('moment')
 
-const propriedadesEstacaoConvencional = ['data_medicao', 'hora_medicao', 'temperatura', 'umidade', 'pressao', 'velocidade_vento', 'direcao_vento',
-  'nebulosidade', 'isolacao', 'temperatura_maxima', 'temperatura_minima', 'precipitacao']
+const propriedadesEstacaoConvencional = ['data_medicao', 'hora_medicao', 'temperatura', 'umidade', 'pressao', 'vento_velocidade', 'vento_direcao',
+  'nebulosidade', 'insolacao', 'temperatura_max', 'temperatura_min', 'precipitacao']
 
 const propriedadesEstacaoAutomatica = ['data_medicao', 'hora_medicao', 'temperatura_inst', 'temperatura_max', 'temperatura_min', 'umidade_inst',
                                       'umidade_max', 'umidade_min', 'pto_orvalho_inst', 'pto_orvalho_max', 'pto_orvalho_min', 'pressao_inst', 'pressao_max',
@@ -27,16 +27,16 @@ function popularObjetoEstacao($, convencional) {
       const value = $(this).text()
 
       if (iteracao > listaDePropriedades.length) {
-        if (value) {
-          estacaoConvencional['propriedadeDesconhecida' + iteracao] = value.trim()
-        } else {
+        if (!value || value === '////' || value === '--' || value.trim() === '') {
           estacaoConvencional['propriedadeDesconhecida' + iteracao] = null
+        } else {
+          estacaoConvencional['propriedadeDesconhecida' + iteracao] = value.trim()
         }
       } else {
-        if (value) {
-          estacaoConvencional[listaDePropriedades[iteracao]] = value.trim()
-        } else {
+        if (!value || value === '////' || value === '--' || value.trim() === '') {
           estacaoConvencional[listaDePropriedades[iteracao]] = null
+        } else {
+          estacaoConvencional[listaDePropriedades[iteracao]] = value.trim()
         }
       }
     })
