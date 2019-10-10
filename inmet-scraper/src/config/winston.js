@@ -10,12 +10,12 @@ module.exports = winston.createLogger({
     })(),
     winston.format.colorize(),
     winston.format.timestamp(),
-    winston.format.printf(({ level, message, timestamp, stack }) => {
-      return stack ? `[${timestamp}] ${level}: ${message} \n ${stack}` : `[${timestamp}] ${level}: ${message}`
+    winston.format.printf(({ level, message, timestamp}) => {
+      return `[${timestamp}] ${level}: ${message}`
     })
   ),
   transports: [
-    new (winston.transports.File)({ filename: moment().format('DD-MM-YYYY').toString() + '_log.log', level: 'info'}),
+    new (winston.transports.File)({ filename: 'InmetScraper-' + moment().format('DD-MM-YYYY').toString() + '.log', level: 'info'}),
     new (winston.transports.Console)
   ]
 })
