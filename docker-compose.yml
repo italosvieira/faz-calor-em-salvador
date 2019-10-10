@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  faz-calor-em-savador-db:
+    image: postgres:12.0
+    container_name: faz-calor-em-savador-db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: admin
+      POSTGRES_DB: faz_calor_em_salvador
