@@ -1,21 +1,66 @@
 import glob
 import logging
+import json
 import numpy
-
+from shapely.geometry import Point
+from src.processors import metadados
 
 from pyhdf.SD import SD, SDC
 
 
 def teste():
+    logging.info("Iniciando processamento de arquivos.")
+
     fileList = [f for f in glob.glob("../data/*.hdf")]
+
+    logging.info("Arquivos a serem processados: " + ", ".join(map(lambda f: f.replace("../data/", ""), fileList)))
 
     for fileName in fileList:
         file = SD(fileName, SDC.READ)
 
         # Read dataset.
-        data = file.select("LST_Day_1km")
-        teste = file.attributes(full=1)
-        dayViewTime = file.select("Day_view_time")
+        # data = file.select("LST_Day_1km")
+        # teste = file.attributes(full=1)
+        # dayViewTime = file.select("Day_view_time")
+
+        fattrs = file.attributes(full=1)
+
+        # Aqui
+        # struct_metadata = fattrs["StructMetadata.0"][0]
+
+        # Aqui o nome do arquivo, nome dos arquivos que geraram esse arquivo de 8 dias e coordenadas pra fazer o
+        # retangulo que é o recorte, nome do dataset
+        core_metadata = fattrs["CoreMetadata.0"][0]
+
+        # Aqui tem as bound coordenadas
+        archive_metadata = fattrs["ArchiveMetadata.0"][0]
+        batata = metadados.obter_metadados(file)
+        print("Hello World!")
+
+        # archive_metadata.split("NORTHBOUNDINGCOORDINATE")[1].split("=")[2].split("\n")[0]
+        # archive_metadata.split("SOUTHBOUNDINGCOORDINATE")[1].split("=")[2].split("\n")[0]
+        # archive_metadata.split("EASTBOUNDINGCOORDINATE")[1].split("=")[2].split("\n")[0]
+        # archive_metadata.split("WESTBOUNDINGCOORDINATE")[1].split("=")[2].split("\n")[0]
+        # archive_metadata.split("LONGNAME")[1].split("=")[2].split("\n")[0]
+
+        # core_metadata.split("LOCALGRANULEID")[1].split("=")[2].split("\n")[0]
+        # core_metadata.split("PRODUCTIONDATETIME")[1].split("=")[2].split("\n")[0]
+        # core_metadata.split("SHORTNAME")[1].split("=")[2].split("\n")[0]
+        # core_metadata.split("RANGEBEGINNINGDATE")[1].split("=")[2].split("\n")[0]
+        # core_metadata.split("RANGEBEGINNINGTIME")[1].split("=")[2].split("\n")[0]
+        # core_metadata.split("RANGEENDINGDATE")[1].split("=")[2].split("\n")[0]
+        # core_metadata.split("RANGEENDINGTIME")[1].split("=")[2].split("\n")[0]
+        # core_metadata.split("INPUTPOINTER")[1].split("=")[2].split("END_OBJECT")[0]
+
+        # core_metadata.split("GRINGPOINTLATITUDE")[1].split("=")[3].split("\n")[0]
+        # core_metadata.split("GRINGPOINTLONGITUDE")[1].split("=")[3].split("\n")[0]
+
+
+
+
+
+
+
 
         # RINGPOINTLONGITUDE\n
         # NUM_VAL = 4\n
@@ -27,6 +72,9 @@ def teste():
         # CLASS = "1"\n
         # VALUE = (-10.0041666666667, -10.0041666666667, -19.9958333333333, -19.9958333333333)\n
         # END_OBJECT =
+
+        # North = latitude
+        # East = longitude
 
         #     OBJECT = NORTHBOUNDINGCOORDINATE
         #     NUM_VAL = 1
