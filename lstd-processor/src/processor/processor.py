@@ -1,14 +1,11 @@
 import glob
 import logging
-import json
-import numpy
-from shapely.geometry import Point
-from src.processors import metadados
+from teste import metadados
 
 from pyhdf.SD import SD, SDC
 
 
-def teste():
+def process_mod11a2():
     logging.info("Iniciando processamento de arquivos.")
 
     fileList = [f for f in glob.glob("../data/*.hdf")]
@@ -54,13 +51,6 @@ def teste():
 
         # core_metadata.split("GRINGPOINTLATITUDE")[1].split("=")[3].split("\n")[0]
         # core_metadata.split("GRINGPOINTLONGITUDE")[1].split("=")[3].split("\n")[0]
-
-
-
-
-
-
-
 
         # RINGPOINTLONGITUDE\n
         # NUM_VAL = 4\n
@@ -119,3 +109,7 @@ def teste():
         # valid_max = vra[0][1]
         # ua = attrs["units"]
         # units = ua[0]
+
+
+def process_mod11a1():
+    print("MOD11A1")

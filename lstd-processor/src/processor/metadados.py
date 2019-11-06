@@ -49,56 +49,56 @@ def extrair_north_bounding_coordinate(archive_metadata):
 
 
 def extrair_south_bounding_coordinate(archive_metadata):
-    return archive_metadata.split(SOUTH_BOUNDING_COORDINATE)[1].split(IGUAL)[2].split(BARRA_N)[0]
+    return archive_metadata.split(SOUTH_BOUNDING_COORDINATE)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
 
 
 def extrair_east_bounding_coordinate(archive_metadata):
-    return archive_metadata.split(EAST_BOUNDING_COORDINATE)[1].split(IGUAL)[2].split(BARRA_N)[0]
+    return archive_metadata.split(EAST_BOUNDING_COORDINATE)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
 
 
 def extrair_west_bounding_coordinate(archive_metadata):
-    return archive_metadata.split(WEST_BOUNDING_COORDINATE)[1].split(IGUAL)[2].split(BARRA_N)[0]
+    return archive_metadata.split(WEST_BOUNDING_COORDINATE)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
 
 
 def extrair_long_name(archive_metadata):
-    return archive_metadata.split(LONG_NAME)[1].split(IGUAL)[2].split(BARRA_N)[0]
+    return archive_metadata.split(LONG_NAME)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
 
 
 def extrair_granule_id(core_metadata):
-    return core_metadata.split(LOCAL_GRANULE_ID)[1].split(IGUAL)[2].split(BARRA_N)[0]
+    return core_metadata.split(LOCAL_GRANULE_ID)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
 
 
 def extrair_production_date_time(core_metadata):
-    return core_metadata.split(PRODUCTION_DATE_TIME)[1].split(IGUAL)[2].split(BARRA_N)[0]
+    return core_metadata.split(PRODUCTION_DATE_TIME)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
 
 
 def extrair_short_name(core_metadata):
-    return core_metadata.split(SHORT_NAME)[1].split(IGUAL)[2].split(BARRA_N)[0]
+    return core_metadata.split(SHORT_NAME)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
 
 
 def extrair_range_begining_date(core_metadata):
-    return core_metadata.split(RANGE_BEGINNING_DATE)[1].split(IGUAL)[2].split(BARRA_N)[0]
+    return core_metadata.split(RANGE_BEGINNING_DATE)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
 
 
 def extrair_range_begining_time(core_metadata):
-    return core_metadata.split(RANGE_BEGINNING_TIME)[1].split(IGUAL)[2].split(BARRA_N)[0]
+    return core_metadata.split(RANGE_BEGINNING_TIME)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
 
 
 def extrair_range_ending_date(core_metadata):
-    return core_metadata.split(RANGE_ENDING_DATE)[1].split(IGUAL)[2].split(BARRA_N)[0]
+    return core_metadata.split(RANGE_ENDING_DATE)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
 
 
 def extrair_range_ending_time(core_metadata):
-    return core_metadata.split(RANGE_ENDING_TIME)[1].split(IGUAL)[2].split(BARRA_N)[0]
+    return core_metadata.split(RANGE_ENDING_TIME)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
 
 
 def extrair_input_pointer(core_metadata):
-    return core_metadata.split(INPUT_POINTER)[1].split(IGUAL)[2].split(END_OBJECT)[0]
+    return core_metadata.split(INPUT_POINTER)[1].split(IGUAL)[2].split(END_OBJECT)[0].strip()
 
 
 def extrair_gring_point_latitude(core_metadata):
-    return core_metadata.split(GRING_POINT_LATITUDE)[1].split(IGUAL)[3].split(BARRA_N)[0]
+    return core_metadata.split(GRING_POINT_LATITUDE)[1].split(IGUAL)[3].split(BARRA_N)[0].strip()
 
 
 def extrair_gring_point_longitude(core_metadata):
-    return core_metadata.split(GRING_POINT_LONGITUDE)[1].split(IGUAL)[3].split(BARRA_N)[0]
+    return core_metadata.split(GRING_POINT_LONGITUDE)[1].split(IGUAL)[3].split(BARRA_N)[0].strip()
