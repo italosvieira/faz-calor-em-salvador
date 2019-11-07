@@ -1,1 +1,1 @@
-from src.processor import iniciar_processamento
+from .processor import iniciar_processamento

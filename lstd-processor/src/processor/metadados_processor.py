@@ -1,3 +1,6 @@
+import json
+import logging
+
 CORE_METADATA_0 = "CoreMetadata.0"
 ARCHIVE_METADATA_0 = "ArchiveMetadata.0"
 IGUAL = "="
@@ -18,12 +21,25 @@ END_OBJECT = "END_OBJECT"
 INPUT_POINTER = "INPUTPOINTER"
 GRING_POINT_LATITUDE = "GRINGPOINTLATITUDE"
 GRING_POINT_LONGITUDE = "GRINGPOINTLONGITUDE"
+EMPTY_STR = ""
+LEFT_PARENTHESES = "("
+RIGHT_PARENTHESES = ")"
+LEFT_BRACKETS = "["
+RIGHT_BRACKETS = "]"
+ASPAS = "\""
+VIRGULA = ","
 
 
-def obter_metadados(file):
-    metadados = file.attributes(full=1)
+def processar_metadados(arquivo, nome_arquivo):
+    metadados = arquivo.attributes(full=1)
+
+    logging.info(nome_arquivo + ": Metadados: " + json.dumps(metadados))
+
     core_metadata = metadados[CORE_METADATA_0][0]
+    logging.info(nome_arquivo + ": Core Metadados: " + json.dumps(core_metadata))
+
     archive_metadata = metadados[ARCHIVE_METADATA_0][0]
+    logging.info(nome_arquivo + ": Archive Metadados: " + json.dumps(archive_metadata))
 
     return {
         "coordenada_limite_norte": extrair_north_bounding_coordinate(archive_metadata),
@@ -61,44 +77,81 @@ def extrair_west_bounding_coordinate(archive_metadata):
 
 
 def extrair_long_name(archive_metadata):
-    return archive_metadata.split(LONG_NAME)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
+    return archive_metadata.split(LONG_NAME)[1].split(IGUAL)[2].split(BARRA_N)[0]. \
+        strip(). \
+        replace(ASPAS, EMPTY_STR). \
+        strip()
 
 
 def extrair_granule_id(core_metadata):
-    return core_metadata.split(LOCAL_GRANULE_ID)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
+    return core_metadata.split(LOCAL_GRANULE_ID)[1].split(IGUAL)[2].split(BARRA_N)[0]. \
+        strip(). \
+        replace(ASPAS, EMPTY_STR). \
+        strip()
 
 
 def extrair_production_date_time(core_metadata):
-    return core_metadata.split(PRODUCTION_DATE_TIME)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
+    return core_metadata.split(PRODUCTION_DATE_TIME)[1].split(IGUAL)[2].split(BARRA_N)[0]. \
+        strip(). \
+        replace(ASPAS, EMPTY_STR). \
+        strip()
 
 
 def extrair_short_name(core_metadata):
-    return core_metadata.split(SHORT_NAME)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
+    return core_metadata.split(SHORT_NAME)[1].split(IGUAL)[2].split(BARRA_N)[0]. \
+        strip(). \
+        replace(ASPAS, EMPTY_STR). \
+        strip()
 
 
 def extrair_range_begining_date(core_metadata):
-    return core_metadata.split(RANGE_BEGINNING_DATE)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
+    return core_metadata.split(RANGE_BEGINNING_DATE)[1].split(IGUAL)[2].split(BARRA_N)[0]. \
+        strip(). \
+        replace(ASPAS, EMPTY_STR). \
+        strip()
 
 
 def extrair_range_begining_time(core_metadata):
-    return core_metadata.split(RANGE_BEGINNING_TIME)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
+    return core_metadata.split(RANGE_BEGINNING_TIME)[1].split(IGUAL)[2].split(BARRA_N)[0]. \
+        strip(). \
+        replace(ASPAS, EMPTY_STR). \
+        strip()
 
 
 def extrair_range_ending_date(core_metadata):
-    return core_metadata.split(RANGE_ENDING_DATE)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
+    return core_metadata.split(RANGE_ENDING_DATE)[1].split(IGUAL)[2].split(BARRA_N)[0]. \
+        strip(). \
+        replace(ASPAS, EMPTY_STR). \
+        strip()
 
 
 def extrair_range_ending_time(core_metadata):
-    return core_metadata.split(RANGE_ENDING_TIME)[1].split(IGUAL)[2].split(BARRA_N)[0].strip()
+    return core_metadata.split(RANGE_ENDING_TIME)[1].split(IGUAL)[2].split(BARRA_N)[0]. \
+        strip(). \
+        replace(ASPAS, EMPTY_STR). \
+        strip()
 
 
 def extrair_input_pointer(core_metadata):
-    return core_metadata.split(INPUT_POINTER)[1].split(IGUAL)[2].split(END_OBJECT)[0].strip()
+    return list(map(lambda f: f.replace(ASPAS, EMPTY_STR).strip(),
+                    core_metadata.split(INPUT_POINTER)[1].split(IGUAL)[2].split(END_OBJECT)[0].
+                    replace(BARRA_N, EMPTY_STR).
+                    replace(LEFT_PARENTHESES, EMPTY_STR).
+                    replace(RIGHT_PARENTHESES, EMPTY_STR).
+                    split(VIRGULA)))
 
 
 def extrair_gring_point_latitude(core_metadata):
-    return core_metadata.split(GRING_POINT_LATITUDE)[1].split(IGUAL)[3].split(BARRA_N)[0].strip()
+    return core_metadata.split(GRING_POINT_LATITUDE)[1].split(IGUAL)[3].split(BARRA_N)[0]. \
+        replace(LEFT_PARENTHESES, EMPTY_STR). \
+        replace(RIGHT_PARENTHESES, EMPTY_STR). \
+        strip(). \
+        split(VIRGULA)
 
 
 def extrair_gring_point_longitude(core_metadata):
-    return core_metadata.split(GRING_POINT_LONGITUDE)[1].split(IGUAL)[3].split(BARRA_N)[0].strip()
+    return core_metadata.split(GRING_POINT_LONGITUDE)[1].split(IGUAL)[3].split(BARRA_N)[0]. \
+        replace(LEFT_PARENTHESES, EMPTY_STR). \
+        replace(RIGHT_PARENTHESES, EMPTY_STR). \
+        strip(). \
+        split(VIRGULA)
