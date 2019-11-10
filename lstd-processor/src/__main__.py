@@ -1,10 +1,10 @@
-import logging
-from src import iniciar_processamento
+from src import config
+from src import process
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] [%(levelname)s]: %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
-    iniciar_processamento()
+    config()
+    process()
 
 
 if __name__ == "__main__":

@@ -1,13 +1,45 @@
 version: '3.7'
 
 services:
-  faz-calor-em-savador-db:
+  faz-calor-em-salvador-db:
     image: postgres:12.0
-    container_name: faz-calor-em-savador-db
+    container_name: faz-calor-em-salvador-db
     restart: always
+    networks:
+      - faz-calor-em-salvador-network
     ports:
       - 5432:5432
+    volumes:
+      - /home/italo/Documents/Databases/faz-calor-em-salvador:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: admin
       POSTGRES_USER: admin
       POSTGRES_DB: faz_calor_em_salvador
+
+  faz-calor-em-salvador-pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "italo.vieira.dev@gmail.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports:
+      - 16543:80
+    depends_on:
+      - faz-calor-em-salvador-db
+    networks:
+      - faz-calor-em-salvador-network
+
+  faz-calor-em-salvador-lstd-processor:
+    image: italosvieira/faz-calor-em-salvador-lstd
+    container_name: faz-calor-em-salvador-lstd
+    networks:
+      - faz-calor-em-salvador-network
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: admin
+      POSTGRES_DB: faz_calor_em_salvador
+      POSTGRES_HOST: faz-calor-em-salvador-db
+
+networks:
+  faz-calor-em-salvador-network:
+    driver: bridge
