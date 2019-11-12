@@ -1,0 +1,21 @@
+{
+  "name": "informsArcgis-processor",
+  "version": "1.0.0",
+  "license": "MIT",
+  "description": "Extrator de bairros de Salvador do Arcgis da Informs-Conder.",
+  "main": "src/index.js",
+  "author": {
+    "name": "Ítalo Da Silva Vieira",
+    "email": "italo.vieira.dev@gmail.com"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "moment": "2.24.0",
+    "pg": "7.12.1",
+    "request": "2.88.0",
+    "request-promise": "4.2.4",
+    "winston": "3.2.1"
+  }
+}
