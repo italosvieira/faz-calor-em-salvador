@@ -1,6 +1,6 @@
 {
   "name": "inmet-scraper",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "license": "MIT",
   "description": "Data scraper do INMET(Instituto Nacional de Metereologia).",
   "main": "src/index.js",
