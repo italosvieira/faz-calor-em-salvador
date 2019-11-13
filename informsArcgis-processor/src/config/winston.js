@@ -15,7 +15,7 @@ module.exports = winston.createLogger({
     })
   ),
   transports: [
-    new (winston.transports.File)({ filename: 'logs/processor/informsArcgis-' + moment().format('DD-MM-YYYY').toString() + '.log', level: 'info'}),
+    new (winston.transports.File)({ filename: 'logs/informsArcgis-' + moment().format('DD-MM-YYYY').toString() + '.log', level: 'info'}),
     new (winston.transports.Console)
   ]
 })

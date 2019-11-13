@@ -1,15 +1,17 @@
 CREATE TABLE bairros (
     id                  BIGSERIAL PRIMARY KEY,
-    nome_bairros        VARCHAR(300) NOT NULL,
-    codigo_bairros      VARCHAR(10) NOT NULL,
-    poligono            JSONB NOT NULL,
-    municipio           BIGINT REFERENCES municipio(id) NOT NULL,
-    UNIQUE(nome_bairros),
-    UNIQUE(codigo_bairros)
+    nome_bairro         VARCHAR(300) NOT NULL,
+    codigo_bairro       INTEGER NOT NULL,
+    poligono            POLYGON NOT NULL,
+    poligono_json       JSON NOT NULL,
+    municipio           BIGINT REFERENCES municipios(id) NOT NULL,
+    UNIQUE(nome_bairro),
+    UNIQUE(codigo_bairro)
 );
 
-CREATE INDEX ON municipio (codigo_municipio);
+CREATE INDEX ON bairros (codigo_bairro);
+CREATE INDEX ON bairros (nome_bairro);
 
-comment on column municipio.id is 'Identificador do registro gerado automaticamente.';
-comment on column municipio.nome_municipio is 'Nome do município extraído do Informs Arcgis.';
-comment on column municipio.codigo_municipio is 'Código do município extraido do Informs Arcgis.';
+comment on column bairros.id is 'Identificador do registro gerado automaticamente.';
+comment on column bairros.nome_bairro is 'Nome do bairro extraído do Informs Arcgis.';
+comment on column bairros.codigo_bairro is 'Código do bairro extraido do Informs Arcgis.';

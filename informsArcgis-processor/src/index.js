@@ -1,8 +1,9 @@
-const service = require('./services/service')
+const service = require('./services/bairro')
 
 async function start () {
-  // await service.inicializarAplicacao()
-  await service.processar()
+  await service.inicializarAplicacao()
+  await service.processarBairros()
+  await service.finalizarAplicacao(0)
 }
 
 start()
