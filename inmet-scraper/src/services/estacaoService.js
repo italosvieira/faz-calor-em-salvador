@@ -9,7 +9,6 @@ const dataFim = moment().format(formatoData).toString()
 const estacaoAutomaticaSalvador = 'http://www.inmet.gov.br/sonabra/pg_dspDadosCodigo_sim.php?QTQwMQ=='
 const estacaoAutomaticaSalvadorRadioMarinha = 'http://www.inmet.gov.br/sonabra/pg_dspDadosCodigo_sim.php?QTQ1Ng=='
 const estacaoConvencionalSalvadorOndina = 'http://www.inmet.gov.br/sim/sonabra/dspDadosCodigo.php?ODMyMjk='
-const alterDatabase = ` ALTER DATABASE faz_calor_em_salvador SET datestyle TO "ISO, DMY" `
 const insertEstacaoAutomaticaSalvador = ` INSERT INTO estacao_automatica_salvador(data_medicao, hora_medicao, temperatura_inst, temperatura_max, temperatura_min, umidade_inst, umidade_max, umidade_min, pto_orvalho_inst, pto_orvalho_max, pto_orvalho_min, pressao_inst, pressao_max, pressao_min, vento_velocidade, vento_direcao, vento_rajada, radiacao, precipitacao) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`
 const insertEstacaoAutomaticaSalvadorJSONB = ` INSERT INTO estacao_automatica_salvador_jsonb(data) VALUES($1)`
 const insertEstacaoAutomaticaSalvadorRadioMarinha = ` INSERT INTO estacao_automatica_salvador_radio_marinha(data_medicao, hora_medicao, temperatura_inst, temperatura_max, temperatura_min, umidade_inst, umidade_max, umidade_min, pto_orvalho_inst, pto_orvalho_max, pto_orvalho_min, pressao_inst, pressao_max, pressao_min, vento_velocidade, vento_direcao, vento_rajada, radiacao, precipitacao) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`
@@ -22,7 +21,6 @@ const inicializarAplicacao = async function () {
     logger.info('Iniciando a aplicação.')
     logger.info('Tentando se conectar ao banco de dados.')
     await db.connect()
-    await db.query(alterDatabase)
   } catch (e) {
     logger.error('Erro ao se conectar ao banco de dados. Mensagem de Erro: ' + e.message)
     await finalizarAplicacao(1)
@@ -30,6 +28,7 @@ const inicializarAplicacao = async function () {
 }
 
 const finalizarAplicacao = async function (code) {
+  logger.info("Finalizando a aplicação.")
   await db.end()
   process.exit(code || 0)
 }
