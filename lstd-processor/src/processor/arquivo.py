@@ -6,9 +6,9 @@ import geopy
 import geopy.distance
 from pyhdf.SD import SD, SDC
 
-from . import save
-from . import metadados as metadados_processor
-from . import dados_cientificos as dados_cientificos_processor
+import src.service.arquivo as service
+import src.processor.metadados as metadados_processor
+import src.processor.dados_cientificos as dados_cientificos_processor
 
 
 def iniciar_processamento_de_arquivos():
@@ -52,13 +52,15 @@ def processar_arquivo(nome_arquivo):
 
     logging.info(sanitizar_nome_arquivo(nome_arquivo) + ": Registros a serem inseridos no banco processados com sucesso.")
 
-    save(metadados, dados_processados)
+    service.save(metadados, dados_processados)
 
 
 def processar_grid(nome_arquivo, metadados, dados_cientificos):
     lista_retorno = []
     lista_latitudes, lista_longitudes = gerar_matriz_coordenadas(metadados["coordenada_limite_norte"],
                                                                  metadados["coordenada_limite_oeste"])
+    poligonos_bairros = dados_cientificos_processor.obter_bairros_como_poligonos()
+
     # Linha é Longitude
     # Coluna é Latitude
     for linha in range(1200):
@@ -76,7 +78,7 @@ def processar_grid(nome_arquivo, metadados, dados_cientificos):
                 "temperatura_noite": dados_cientificos_processor.processar_temperatura(linha, coluna, dados_temperatura_noite["indicador_temperatura"]),
                 "qualidade_do_pixel_noite": dados_cientificos_processor.processar_qualidade_do_pixel(linha, coluna, dados_temperatura_noite["indicador_qualidade"]),
                 "hora_registro_pixel_noite": dados_cientificos_processor.processar_hora_registro_pixel(linha, coluna, dados_temperatura_noite["indicador_hora"]),
-                "bairro": dados_cientificos_processor.processar_bairros(lista_latitudes[coluna], lista_longitudes[linha])
+                "bairro": dados_cientificos_processor.processar_bairros(lista_latitudes[coluna], lista_longitudes[linha], poligonos_bairros)
             })
 
     return lista_retorno

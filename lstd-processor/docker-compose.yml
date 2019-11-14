@@ -1,0 +1,27 @@
+version: '3.7'
+
+services:
+  faz-calor-em-salvador-lstd-processor:
+    image: italosvieira/faz-calor-em-salvador-lstd
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 6144M
+        reservations:
+          cpus: '1.0'
+          memory: 1024M
+    container_name: faz-calor-em-salvador-lstd
+    networks:
+      - nonet
+    environment:
+      POSTGRES_PASSWORD: "admin"
+      POSTGRES_USER: "admin"
+      POSTGRES_DB: "faz_calor_em_salvador"
+      POSTGRES_HOST: "faz-calor-em-salvador-db"
+      REPROCESSAR_ARQUIVOS: "false"
+
+networks:
+  nonet:
+    external: true
+    name: faz-calor-em-salvador_faz-calor-em-salvador-network

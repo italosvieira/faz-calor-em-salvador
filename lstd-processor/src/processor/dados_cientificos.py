@@ -1,7 +1,9 @@
 import numpy
 import logging
 import textwrap
-from osgeo import ogr
+from shapely.geometry import Point, asPolygon
+
+import src.service.dados_cientificos as service
 
 
 def processar_dados_cientificos(arquivo, metadados, nome_arquivo):
@@ -175,22 +177,38 @@ def processar_hora_registro_pixel(linha, coluna, indicador_hora):
     return int(hora * indicador_hora["fator_escalar"])
 
 
-def processar_bairros(latitude, longitude):
-    point1 = ogr.Geometry(ogr.wkbPoint)
-    # point1.AddPoint(longitude, latitude)
-    point1.AddPoint(-38.52982521057129, -13.005791274703812)
+def processar_bairros(latitude, longitude, poligonos_bairros):
+    for bairro in poligonos_bairros:
+        # point = Point(latitude, longitude)
+        # point.within(bairro.poligono)
+        if bairro["poligono"].contains(Point(float(longitude), float(latitude))):
+            return bairro.id
 
-    ring = ogr.Geometry(ogr.wkbLinearRing)
-    ring.AddPoint(-38.51755142211914, -13.010265380580984)
-    ring.AddPoint(-38.52431058883667, -13.002195205876193)
-    ring.AddPoint(-38.52838754653931, -13.00378417294829)
-    ring.AddPoint(-38.527464866638184, -12.996487384978787)
-    ring.AddPoint(-38.535726070404046, -13.002696986050923)
-    ring.AddPoint(-38.533945083618164, -13.013255041853022)
-    ring.AddPoint(-38.51755142211914, -13.010265380580984)
-    polygon = ogr.Geometry(ogr.wkbPolygon)
-    polygon.AddGeometry(ring)
-    polygon.Contains(point1)
+    # point1 = ogr.Geometry(ogr.wkbPoint)
+    # # point1.AddPoint(longitude, latitude)
+    # point1.AddPoint(-38.52982521057129, -13.005791274703812)
+    #
+    # ring = ogr.Geometry(ogr.wkbLinearRing)
+    # ring.AddPoint(-38.51755142211914, -13.010265380580984)
+    # ring.AddPoint(-38.52431058883667, -13.002195205876193)
+    # ring.AddPoint(-38.52838754653931, -13.00378417294829)
+    # ring.AddPoint(-38.527464866638184, -12.996487384978787)
+    # ring.AddPoint(-38.535726070404046, -13.002696986050923)
+    # ring.AddPoint(-38.533945083618164, -13.013255041853022)
+    # ring.AddPoint(-38.51755142211914, -13.010265380580984)
+    # polygon = ogr.Geometry(ogr.wkbPolygon)
+    # polygon.AddGeometry(ring)
+    # polygon.Contains(point1)
+
+
+def obter_bairros_como_poligonos():
+    lista_retorno = []
+    bairros = service.consultar_bairros()
+
+    for bairro in bairros:
+        lista_retorno.append({"id": bairro[0], "poligono": asPolygon(bairro[4])})
+
+    return lista_retorno
 
 
 def extrair_valor_de_preenchemento(atributos):
