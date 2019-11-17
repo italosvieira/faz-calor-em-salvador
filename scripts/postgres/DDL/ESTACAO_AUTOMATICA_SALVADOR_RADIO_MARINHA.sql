@@ -22,7 +22,7 @@ CREATE TABLE estacao_automatica_salvador_radio_marinha (
     UNIQUE(data_medicao, hora_medicao)
 );
 
-CREATE INDEX ON estacao_automatica_salvador_radio_marinha (data_medicao DESC);
+CREATE INDEX ON estacao_automatica_salvador_radio_marinha(data_medicao DESC);
 
 comment on column estacao_automatica_salvador_radio_marinha.id is 'Identificador do registro gerado automaticamente.';
 comment on column estacao_automatica_salvador_radio_marinha.data_medicao is 'Data de quando foi medido os dados do registro. No formato DD/MM/YYYY';

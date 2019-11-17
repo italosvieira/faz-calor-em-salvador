@@ -15,7 +15,7 @@ CREATE TABLE estacao_convencional_salvador (
     UNIQUE(data_medicao, hora_medicao)
 );
 
-CREATE INDEX ON estacao_convencional_salvador (data_medicao DESC);
+CREATE INDEX ON estacao_convencional_salvador(data_medicao DESC);
 
 comment on column estacao_convencional_salvador.id is 'Identificador do registro gerado automaticamente.';
 comment on column estacao_convencional_salvador.data_medicao is 'Data de quando foi medido os dados do registro. No formato DD/MM/YYYY';

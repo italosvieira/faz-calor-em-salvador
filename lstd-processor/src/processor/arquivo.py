@@ -5,10 +5,12 @@ import logging
 import geopy
 import geopy.distance
 from pyhdf.SD import SD, SDC
+from multiprocessing import Pool
 
-import src.service.arquivo as service
 import src.processor.metadados as metadados_processor
 import src.processor.dados_cientificos as dados_cientificos_processor
+import src.service.metadados as metadados_service
+import src.service.dados_cientificos as dados_cientificos_service
 
 
 def iniciar_processamento_de_arquivos():
@@ -32,68 +34,87 @@ def sanitizar_nome_arquivo(nome_arquivo):
 
 
 def processar_arquivo(nome_arquivo):
-    logging.info(sanitizar_nome_arquivo(nome_arquivo) + ": Iniciando o processamento.")
+    nome_arquivo_sanitizado = sanitizar_nome_arquivo(nome_arquivo)
+    logging.info(nome_arquivo_sanitizado + ": Iniciando o processamento.")
     arquivo = SD(nome_arquivo, SDC.READ)
 
-    logging.info(sanitizar_nome_arquivo(nome_arquivo) + ": Iniciando o processamento de metadados.")
-    metadados = metadados_processor.processar_metadados(arquivo, sanitizar_nome_arquivo(nome_arquivo))
+    logging.info(nome_arquivo_sanitizado + ": Iniciando o processamento de metadados.")
+    metadados = metadados_processor.processar_metadados(arquivo, nome_arquivo_sanitizado)
 
-    logging.info(sanitizar_nome_arquivo(nome_arquivo) + ": Metadados extraidos do arquivo: " + json.dumps(metadados))
+    logging.info(nome_arquivo_sanitizado + ": Metadados extraidos do arquivo: " + json.dumps(metadados))
 
-    logging.info(sanitizar_nome_arquivo(nome_arquivo) + ": Iniciando o processamento dos dados científicos.")
-    dados_cientificos = dados_cientificos_processor.processar_dados_cientificos(arquivo, metadados,
-                                                                                sanitizar_nome_arquivo(nome_arquivo))
+    logging.info(nome_arquivo_sanitizado + ": Iniciando o processamento dos dados científicos.")
+    dados_cientificos = dados_cientificos_processor.processar_dados_cientificos(arquivo, metadados, nome_arquivo_sanitizado)
 
-    logging.info(sanitizar_nome_arquivo(nome_arquivo) + ": Dados científicos extraidos do arquivo com sucesso.")
+    logging.info(nome_arquivo_sanitizado + ": Dados científicos extraidos do arquivo com sucesso.")
 
     # Processa os dados_cientificos. Depois que termina esse processamento salva os metadados e cada dado cientifico.
-    logging.info(sanitizar_nome_arquivo(nome_arquivo) + ": Iniciando processamento dos registros a serem inseridos no banco.")
-    dados_processados = processar_grid(nome_arquivo, metadados, dados_cientificos)
+    logging.info(nome_arquivo_sanitizado + ": Iniciando processamento dos registros a serem inseridos no banco.")
+    processar_grid(nome_arquivo_sanitizado, metadados, dados_cientificos)
 
-    logging.info(sanitizar_nome_arquivo(nome_arquivo) + ": Registros a serem inseridos no banco processados com sucesso.")
+    logging.info(nome_arquivo_sanitizado + ": Arquivo processado com sucesso.")
 
-    service.save(metadados, dados_processados)
+
+def batata(json_dados):
+    linha = json_dados["linha"]
+    lista_latitudes = json_dados["lista_latitudes"]
+    lista_longitudes = json_dados["lista_longitudes"]
+    dados_temperatura_dia = json_dados["dados_cientificos"]["dados_temperatura_dia"]
+    dados_temperatura_noite = json_dados["dados_cientificos"]["dados_temperatura_noite"]
+    poligonos_bairros = dados_cientificos_processor.obter_bairros_como_poligonos()
+    nome_arquivo = json_dados["nome_arquivo"]
+    latitude = lista_latitudes[linha]
+
+    for coluna in range(1200):
+        longitude = lista_longitudes[coluna]
+        id_bairro = dados_cientificos_processor.processar_bairros(latitude, longitude, poligonos_bairros)
+
+        teste = {
+            "id_bairro": id_bairro,
+            "id_metadados": json_dados["metadados_id"],
+            "latitude": latitude,
+            "longitude": longitude,
+            "temperatura_dia": dados_cientificos_processor.processar_temperatura(linha, coluna, dados_temperatura_dia["indicador_temperatura"]),
+            "qualidade_do_pixel_dia": dados_cientificos_processor.processar_qualidade_do_pixel(linha, coluna, dados_temperatura_dia["indicador_qualidade"]),
+            "hora_registro_pixel_dia": dados_cientificos_processor.processar_hora_registro_pixel(linha, coluna, dados_temperatura_dia["indicador_hora"]),
+            "temperatura_noite": dados_cientificos_processor.processar_temperatura(linha, coluna, dados_temperatura_noite["indicador_temperatura"]),
+            "qualidade_do_pixel_noite": dados_cientificos_processor.processar_qualidade_do_pixel(linha, coluna, dados_temperatura_noite["indicador_qualidade"]),
+            "hora_registro_pixel_noite": dados_cientificos_processor.processar_hora_registro_pixel(linha, coluna, dados_temperatura_noite["indicador_hora"])
+        }
+
+        if id_bairro is not None:
+            logging.info(nome_arquivo + ": Salvando no banco de dados o registro: " + json.dumps(teste))
+            id_dado_cientifico = dados_cientificos_service.save(teste)
+            logging.info(nome_arquivo + ": Registro salvo na tabela lstd_dados_cientificos com o id: " + str(id_dado_cientifico))
 
 
 def processar_grid(nome_arquivo, metadados, dados_cientificos):
-    lista_retorno = []
     lista_latitudes, lista_longitudes = gerar_matriz_coordenadas(metadados["coordenada_limite_norte"],
                                                                  metadados["coordenada_limite_oeste"])
-    poligonos_bairros = dados_cientificos_processor.obter_bairros_como_poligonos()
+    metadados_id = metadados_service.get_medatados_id_by_nome_arquivo_or_insert(metadados)
 
-    # Linha é Longitude
-    # Coluna é Latitude
-    for linha in range(1200):
-        for coluna in range(1200):
-            dados_temperatura_dia = dados_cientificos["dados_temperatura_dia"]
-            dados_temperatura_noite = dados_cientificos["dados_temperatura_noite"]
-
-            lista_retorno.append({
-                "id_metadados": "",
-                "latitude": lista_latitudes[coluna],
-                "longitude": lista_longitudes[linha],
-                "temperatura_dia": dados_cientificos_processor.processar_temperatura(linha, coluna, dados_temperatura_dia["indicador_temperatura"]),
-                "qualidade_do_pixel_dia": dados_cientificos_processor.processar_qualidade_do_pixel(linha, coluna, dados_temperatura_dia["indicador_qualidade"]),
-                "hora_registro_pixel_dia": dados_cientificos_processor.processar_hora_registro_pixel(linha, coluna, dados_temperatura_dia["indicador_hora"]),
-                "temperatura_noite": dados_cientificos_processor.processar_temperatura(linha, coluna, dados_temperatura_noite["indicador_temperatura"]),
-                "qualidade_do_pixel_noite": dados_cientificos_processor.processar_qualidade_do_pixel(linha, coluna, dados_temperatura_noite["indicador_qualidade"]),
-                "hora_registro_pixel_noite": dados_cientificos_processor.processar_hora_registro_pixel(linha, coluna, dados_temperatura_noite["indicador_hora"]),
-                "bairro": dados_cientificos_processor.processar_bairros(lista_latitudes[coluna], lista_longitudes[linha], poligonos_bairros)
-            })
-
-    return lista_retorno
+    with Pool(50) as pool:
+        for linha in range(1200):
+            pool.map(batata, [{
+                "linha": linha,
+                "metadados_id": metadados_id,
+                "lista_latitudes": lista_latitudes,
+                "lista_longitudes": lista_longitudes,
+                "dados_cientificos": dados_cientificos,
+                "nome_arquivo": nome_arquivo,
+            }])
 
 
-def gerar_matriz_coordenadas(latitude, longitude):
+def gerar_matriz_coordenadas(lat, lon):
     latitudes, longitudes = [], []
-    latitudes.append(latitude)
-    longitudes.append(longitude)
+    latitudes.append(float(lat))
+    longitudes.append(float(lon))
 
     # 90 para andar pra direita isso é longitude
     # 180 para andar pra baixo isso é latitude
-    latitude_inicio = geopy.Point(latitude, longitude)
-    longitude_inicio = geopy.Point(latitude, longitude)
-    distancia = geopy.distance.VincentyDistance(kilometers=1)
+    latitude_inicio = geopy.Point(latitude=lat, longitude=lon)
+    longitude_inicio = geopy.Point(latitude=lat, longitude=lon)
+    distancia = geopy.distance.distance(kilometers=1)
 
     for i in range(1199):
         latitude_inicio = distancia.destination(point=latitude_inicio, bearing=180)

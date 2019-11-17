@@ -9,8 +9,8 @@ CREATE TABLE bairros (
     UNIQUE(codigo_bairro)
 );
 
-CREATE INDEX ON bairros (codigo_bairro);
-CREATE INDEX ON bairros (nome_bairro);
+CREATE INDEX ON bairros(codigo_bairro);
+CREATE INDEX ON bairros(nome_bairro);
 
 comment on column bairros.id is 'Identificador do registro gerado automaticamente.';
 comment on column bairros.nome_bairro is 'Nome do bairro extraído do Informs Arcgis.';

@@ -6,8 +6,8 @@ CREATE TABLE municipios (
     UNIQUE(nome_municipio)
 );
 
-CREATE INDEX ON municipios (codigo_municipio);
-CREATE INDEX ON municipios (nome_municipio);
+CREATE INDEX ON municipios(codigo_municipio);
+CREATE INDEX ON municipios(nome_municipio);
 
 comment on column municipios.id is 'Identificador do registro gerado automaticamente.';
 comment on column municipios.nome_municipio is 'Nome do município extraído do Informs Arcgis.';

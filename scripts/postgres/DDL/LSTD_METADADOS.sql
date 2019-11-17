@@ -15,8 +15,8 @@ CREATE TABLE lstd_metadados (
     UNIQUE(nome_arquivo)
 );
 
-CREATE INDEX ON lstd_metadados (nome_arquivo);
-CREATE INDEX ON lstd_metadados (nome_dataset);
+CREATE INDEX ON lstd_metadados(nome_arquivo);
+CREATE INDEX ON lstd_metadados(nome_dataset);
 
 comment on column lstd_metadados.id is 'Identificador do registro gerado automaticamente.';
 comment on column lstd_metadados.nome_arquivo is 'Nome do arquivo gerador do registro.';

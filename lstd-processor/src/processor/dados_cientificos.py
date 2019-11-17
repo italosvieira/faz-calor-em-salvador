@@ -4,11 +4,12 @@ import textwrap
 from shapely.geometry import Point, asPolygon
 
 import src.service.dados_cientificos as service
+from rtree import index
 
 
 def processar_dados_cientificos(arquivo, metadados, nome_arquivo):
     if metadados["nome_dataset"] == "MOD11A1":
-        return processar_mod11a1(arquivo, metadados, nome_arquivo)
+        return processar_mod11a2(arquivo, nome_arquivo)
     return processar_mod11a2(arquivo, nome_arquivo)
 
 
@@ -97,74 +98,13 @@ def processar_qualidade_do_pixel(linha, coluna, indicador_qualidade):
     qualidade_pixel_bit_string = numpy.binary_repr(qualidade_pixel, width=8)
     qualidade_pixel_array = textwrap.wrap(qualidade_pixel_bit_string, 2)
 
-    qualidade_pixel_array[0]
-    qualidade_pixel_array[1]
-    qualidade_pixel_array[2]
-    qualidade_pixel_array[3]
-
     return {
         "qualidade_pixel_bit_string": qualidade_pixel_bit_string,
-        "qualidade_do_dado_obrigatorio": processar_qualidade_do_dado_obrigatorio(qualidade_pixel_array[3]),
-        "qualidade_do_dado": processar_qualidade_do_dado(qualidade_pixel_array[2]),
-        "erro_de_emissao": processar_erro_de_emissao(qualidade_pixel_array[1]),
-        "lst_erro": processar_lst_erro(qualidade_pixel_array[0])
+        "qualidade_pixel_obrigatoria": qualidade_pixel_array[3],
+        "qualidade_pixel": qualidade_pixel_array[2],
+        "media_erro_emissao": qualidade_pixel_array[1],
+        "media_erro_temperatura": qualidade_pixel_array[0]
     }
-
-
-def processar_qualidade_do_dado_obrigatorio(dado):
-    if dado == "00":
-        return "Gerado, boa qualidade, não necessita de revalidação"
-
-    if dado == "01":
-        return "Gerado, outra qualidade, não necessita de revalidação"
-
-    if dado == "10":
-        return "Não gerado por causa do efeito das nuvens"
-
-    if dado == "11":
-        return "Não gerado por algum motivo fora o das nuvens"
-
-
-def processar_qualidade_do_dado(dado):
-    if dado == "00":
-        return "Dado de boa qualidade"
-
-    if dado == "01":
-        return "Dado de outra qualidade"
-
-    if dado == "10":
-        return "Não definido"
-
-    if dado == "11":
-        return "Não definido"
-
-
-def processar_erro_de_emissao(dado):
-    if dado == "00":
-        return "Média de erro de emissão <= 0.01"
-
-    if dado == "01":
-        return "Média de erro de emissão <= 0.02"
-
-    if dado == "10":
-        return "Média de erro de emissão <= 0.04"
-
-    if dado == "11":
-        return "Média de erro de emissão > 0.04"
-
-
-def processar_lst_erro(dado):
-    if dado == "00":
-        return "Média LST erro <= 1K"
-
-    if dado == "01":
-        return "Média LST erro <= 2K"
-
-    if dado == "10":
-        return "Média LST erro <= 3K"
-
-    if dado == "11":
-        return "Média LST erro > 3K"
 
 
 def processar_hora_registro_pixel(linha, coluna, indicador_hora):
@@ -178,37 +118,28 @@ def processar_hora_registro_pixel(linha, coluna, indicador_hora):
 
 
 def processar_bairros(latitude, longitude, poligonos_bairros):
-    for bairro in poligonos_bairros:
-        # point = Point(latitude, longitude)
-        # point.within(bairro.poligono)
-        if bairro["poligono"].contains(Point(float(longitude), float(latitude))):
-            return bairro.id
+    index = poligonos_bairros[0]
+    lista_poligos_bairro = poligonos_bairros[1]
+    point = Point(float(longitude), float(latitude))
 
-    # point1 = ogr.Geometry(ogr.wkbPoint)
-    # # point1.AddPoint(longitude, latitude)
-    # point1.AddPoint(-38.52982521057129, -13.005791274703812)
-    #
-    # ring = ogr.Geometry(ogr.wkbLinearRing)
-    # ring.AddPoint(-38.51755142211914, -13.010265380580984)
-    # ring.AddPoint(-38.52431058883667, -13.002195205876193)
-    # ring.AddPoint(-38.52838754653931, -13.00378417294829)
-    # ring.AddPoint(-38.527464866638184, -12.996487384978787)
-    # ring.AddPoint(-38.535726070404046, -13.002696986050923)
-    # ring.AddPoint(-38.533945083618164, -13.013255041853022)
-    # ring.AddPoint(-38.51755142211914, -13.010265380580984)
-    # polygon = ogr.Geometry(ogr.wkbPolygon)
-    # polygon.AddGeometry(ring)
-    # polygon.Contains(point1)
+    for j in index.intersection(point.bounds):
+        filtered = list(filter(lambda x: x[0] == j, lista_poligos_bairro))
+        if filtered[0][1].contains(point):
+            return j
 
 
 def obter_bairros_como_poligonos():
-    lista_retorno = []
     bairros = service.consultar_bairros()
+    idx = index.Index()
+    lista_poligonos = []
 
     for bairro in bairros:
-        lista_retorno.append({"id": bairro[0], "poligono": asPolygon(bairro[4])})
+        id_bairro = bairro[0]
+        poligono_bairro = asPolygon(bairro[1])
+        idx.insert(id_bairro, poligono_bairro.bounds)
+        lista_poligonos.append((id_bairro, poligono_bairro))
 
-    return lista_retorno
+    return idx, lista_poligonos
 
 
 def extrair_valor_de_preenchemento(atributos):
