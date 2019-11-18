@@ -55,7 +55,7 @@ def processar_arquivo(nome_arquivo):
     logging.info(nome_arquivo_sanitizado + ": Arquivo processado com sucesso.")
 
 
-def batata(json_dados):
+def processar_dados_cientificos(json_dados):
     linha = json_dados["linha"]
     lista_latitudes = json_dados["lista_latitudes"]
     lista_longitudes = json_dados["lista_longitudes"]
@@ -69,7 +69,7 @@ def batata(json_dados):
         longitude = lista_longitudes[coluna]
         id_bairro = dados_cientificos_processor.processar_bairros(latitude, longitude, poligonos_bairros)
 
-        teste = {
+        lst_dados_cientificos = {
             "id_bairro": id_bairro,
             "id_metadados": json_dados["metadados_id"],
             "latitude": latitude,
@@ -83,8 +83,8 @@ def batata(json_dados):
         }
 
         if id_bairro is not None:
-            logging.info(nome_arquivo + ": Salvando no banco de dados o registro: " + json.dumps(teste))
-            id_dado_cientifico = dados_cientificos_service.save(teste)
+            logging.info(nome_arquivo + ": Salvando no banco de dados o registro: " + json.dumps(lst_dados_cientificos))
+            id_dado_cientifico = dados_cientificos_service.save(lst_dados_cientificos)
             logging.info(nome_arquivo + ": Registro salvo na tabela lstd_dados_cientificos com o id: " + str(id_dado_cientifico))
 
 
@@ -95,7 +95,7 @@ def processar_grid(nome_arquivo, metadados, dados_cientificos):
 
     with Pool(50) as pool:
         for linha in range(1200):
-            pool.map(batata, [{
+            pool.map(processar_dados_cientificos, [{
                 "linha": linha,
                 "metadados_id": metadados_id,
                 "lista_latitudes": lista_latitudes,
