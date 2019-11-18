@@ -47,7 +47,7 @@ def extrair_dados_temperatura(arquivo, nome_arquivo, nome_dado_cientifico):
     atributos = lst.attributes(full=1)
 
     return {
-        "matriz_temperatura": lst[:, :].astype(numpy.int16),
+        "matriz_temperatura": lst[:, :].astype(numpy.double),
         "valor_de_preenchemento": extrair_valor_de_preenchemento(atributos),
         "fator_escalar": extrair_fator_escalar(atributos),
         "valor_valido_minimo": extrair_valor_minimo_valido(atributos),
