@@ -1,7 +1,7 @@
 import numpy
 import logging
 import textwrap
-from shapely.geometry import Point, asPolygon
+from shapely.geometry import asPolygon
 
 import src.service.dados_cientificos as service
 from rtree import index
@@ -82,8 +82,7 @@ def extrair_hora(arquivo, nome_arquivo, nome_dado_cientifico):
 def processar_temperatura(linha, coluna, indicador_temperatura):
     temperatura = indicador_temperatura["matriz_temperatura"][linha][coluna]
 
-    if temperatura == indicador_temperatura["valor_de_preenchemento"] or (
-            indicador_temperatura["valor_valido_maximo"] < temperatura < indicador_temperatura["valor_valido_minimo"]):
+    if temperatura == indicador_temperatura["valor_de_preenchemento"] or (indicador_temperatura["valor_valido_maximo"] < temperatura < indicador_temperatura["valor_valido_minimo"]):
         return None
 
     return (temperatura * indicador_temperatura["fator_escalar"]) - 273.15
@@ -115,17 +114,6 @@ def processar_hora_registro_pixel(linha, coluna, indicador_hora):
         return None
 
     return int(hora * indicador_hora["fator_escalar"])
-
-
-def processar_bairros(latitude, longitude, poligonos_bairros):
-    index = poligonos_bairros[0]
-    lista_poligos_bairro = poligonos_bairros[1]
-    point = Point(float(longitude), float(latitude))
-
-    for j in index.intersection(point.bounds):
-        filtered = list(filter(lambda x: x[0] == j, lista_poligos_bairro))
-        if filtered[0][1].contains(point):
-            return j
 
 
 def obter_bairros_como_poligonos():

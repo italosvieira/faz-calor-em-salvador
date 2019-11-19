@@ -1,16 +1,15 @@
 import glob
 import json
 import logging
+import re
 
-import geopy
-import geopy.distance
+import mpl_toolkits.basemap.pyproj as pyproj
+import numpy as np
 from pyhdf.SD import SD, SDC
-from multiprocessing import Pool
+from shapely.geometry import Point
 
-import src.processor.metadados as metadados_processor
 import src.processor.dados_cientificos as dados_cientificos_processor
-import src.service.metadados as metadados_service
-import src.service.dados_cientificos as dados_cientificos_service
+import src.processor.metadados as metadados_processor
 
 
 def iniciar_processamento_de_arquivos():
@@ -50,76 +49,108 @@ def processar_arquivo(nome_arquivo):
 
     # Processa os dados_cientificos. Depois que termina esse processamento salva os metadados e cada dado cientifico.
     logging.info(nome_arquivo_sanitizado + ": Iniciando processamento dos registros a serem inseridos no banco.")
-    processar_grid(nome_arquivo_sanitizado, metadados, dados_cientificos)
+    processar_grid(arquivo, nome_arquivo_sanitizado, metadados, dados_cientificos)
 
     logging.info(nome_arquivo_sanitizado + ": Arquivo processado com sucesso.")
 
 
-def processar_dados_cientificos(json_dados):
-    linha = json_dados["linha"]
-    lista_latitudes = json_dados["lista_latitudes"]
-    lista_longitudes = json_dados["lista_longitudes"]
-    dados_temperatura_dia = json_dados["dados_cientificos"]["dados_temperatura_dia"]
-    dados_temperatura_noite = json_dados["dados_cientificos"]["dados_temperatura_noite"]
-    poligonos_bairros = dados_cientificos_processor.obter_bairros_como_poligonos()
-    nome_arquivo = json_dados["nome_arquivo"]
-    latitude = lista_latitudes[linha]
+def processar_grid(arquivo, nome_arquivo, metadados, dados_cientificos):
+    latitudes, longitudes = gerar_matriz_coordenadas(arquivo)
+    index, lista_poligos_bairro = dados_cientificos_processor.obter_bairros_como_poligonos()
+    dados_temperatura_dia = dados_cientificos["dados_temperatura_dia"]
+    dados_temperatura_noite = dados_cientificos["dados_temperatura_noite"]
+    # metadados_id = metadados_service.get_medatados_id_by_nome_arquivo_or_insert(metadados)
 
-    for coluna in range(1200):
-        longitude = lista_longitudes[coluna]
-        id_bairro = dados_cientificos_processor.processar_bairros(latitude, longitude, poligonos_bairros)
+    for linha in range(1200):
+        for coluna in range(1200):
+            latitude = latitudes[linha][coluna]
+            longitude = longitudes[linha][coluna]
+            point = Point(longitude, latitude)
+            id_bairro = None
 
-        lst_dados_cientificos = {
-            "id_bairro": id_bairro,
-            "id_metadados": json_dados["metadados_id"],
-            "latitude": latitude,
-            "longitude": longitude,
-            "temperatura_dia": dados_cientificos_processor.processar_temperatura(linha, coluna, dados_temperatura_dia["indicador_temperatura"]),
-            "qualidade_do_pixel_dia": dados_cientificos_processor.processar_qualidade_do_pixel(linha, coluna, dados_temperatura_dia["indicador_qualidade"]),
-            "hora_registro_pixel_dia": dados_cientificos_processor.processar_hora_registro_pixel(linha, coluna, dados_temperatura_dia["indicador_hora"]),
-            "temperatura_noite": dados_cientificos_processor.processar_temperatura(linha, coluna, dados_temperatura_noite["indicador_temperatura"]),
-            "qualidade_do_pixel_noite": dados_cientificos_processor.processar_qualidade_do_pixel(linha, coluna, dados_temperatura_noite["indicador_qualidade"]),
-            "hora_registro_pixel_noite": dados_cientificos_processor.processar_hora_registro_pixel(linha, coluna, dados_temperatura_noite["indicador_hora"])
-        }
+            for j in index.intersection(point.bounds):
+                filtered = list(filter(lambda x: x[0] == j, lista_poligos_bairro))
+                if filtered[0][1].contains(point):
+                    id_bairro = j
 
-        if id_bairro is not None:
-            logging.info(nome_arquivo + ": Salvando no banco de dados o registro: " + json.dumps(lst_dados_cientificos))
-            id_dado_cientifico = dados_cientificos_service.save(lst_dados_cientificos)
-            logging.info(nome_arquivo + ": Registro salvo na tabela lstd_dados_cientificos com o id: " + str(id_dado_cientifico))
+            lst_dados_cientificos = {
+                "id_bairro": id_bairro,
+                "id_metadados": "",
+                "latitude": latitude,
+                "longitude": longitude,
+                "temperatura_dia": dados_cientificos_processor.processar_temperatura(linha, coluna, dados_temperatura_dia["indicador_temperatura"]),
+                "qualidade_do_pixel_dia": dados_cientificos_processor.processar_qualidade_do_pixel(linha, coluna, dados_temperatura_dia["indicador_qualidade"]),
+                "hora_registro_pixel_dia": dados_cientificos_processor.processar_hora_registro_pixel(linha, coluna, dados_temperatura_dia["indicador_hora"]),
+                "temperatura_noite": dados_cientificos_processor.processar_temperatura(linha, coluna, dados_temperatura_noite["indicador_temperatura"]),
+                "qualidade_do_pixel_noite": dados_cientificos_processor.processar_qualidade_do_pixel(linha, coluna, dados_temperatura_noite["indicador_qualidade"]),
+                "hora_registro_pixel_noite": dados_cientificos_processor.processar_hora_registro_pixel(linha, coluna, dados_temperatura_noite["indicador_hora"])
+            }
 
-
-def processar_grid(nome_arquivo, metadados, dados_cientificos):
-    lista_latitudes, lista_longitudes = gerar_matriz_coordenadas(metadados["coordenada_limite_norte"],
-                                                                 metadados["coordenada_limite_oeste"])
-    metadados_id = metadados_service.get_medatados_id_by_nome_arquivo_or_insert(metadados)
-
-    with Pool(50) as pool:
-        for linha in range(1200):
-            pool.map(processar_dados_cientificos, [{
-                "linha": linha,
-                "metadados_id": metadados_id,
-                "lista_latitudes": lista_latitudes,
-                "lista_longitudes": lista_longitudes,
-                "dados_cientificos": dados_cientificos,
-                "nome_arquivo": nome_arquivo,
-            }])
+            if id_bairro is not None:
+                # logging.info(nome_arquivo + ": Salvando no banco de dados o registro: " + json.dumps(lst_dados_cientificos))
+                # id_dado_cientifico = dados_cientificos_service.save(lst_dados_cientificos)
+                # logging.info(nome_arquivo + ": Registro salvo na tabela lstd_dados_cientificos com o id: " + str(id_dado_cientifico))
+                logging.info("Bairro: %s. Temperatura Dia: %s. Temperatura Noite: %s. Latitude: %s. Longitude: %s",
+                             lst_dados_cientificos["id_bairro"],
+                             lst_dados_cientificos["temperatura_dia"], lst_dados_cientificos["temperatura_noite"],
+                             lst_dados_cientificos["latitude"], lst_dados_cientificos["longitude"])
 
 
-def gerar_matriz_coordenadas(lat, lon):
-    latitudes, longitudes = [], []
-    latitudes.append(float(lat))
-    longitudes.append(float(lon))
+def gerar_matriz_coordenadas(arquivo):
+    data2D = arquivo.select("LST_Day_1km")
+    data = data2D[:, :].astype(np.double)
 
-    # 90 para andar pra direita isso é longitude
-    # 180 para andar pra baixo isso é latitude
-    latitude_inicio = geopy.Point(latitude=lat, longitude=lon)
-    longitude_inicio = geopy.Point(latitude=lat, longitude=lon)
-    distancia = geopy.distance.distance(kilometers=1)
+    # Read attributes.
+    attrs = data2D.attributes(full=1)
+    lna = attrs["long_name"]
+    long_name = lna[0]
+    vra = attrs["valid_range"]
+    valid_range = vra[0]
+    fva = attrs["_FillValue"]
+    _FillValue = fva[0]
+    sfa = attrs["scale_factor"]
+    scale_factor = sfa[0]
+    aoa = attrs["add_offset"]
+    add_offset = aoa[0]
 
-    for i in range(1199):
-        latitude_inicio = distancia.destination(point=latitude_inicio, bearing=180)
-        longitude_inicio = distancia.destination(point=longitude_inicio, bearing=90)
-        latitudes.append(latitude_inicio.latitude)
-        longitudes.append(longitude_inicio.longitude)
+    # Apply the attributes to the data.
+    invalid = np.logical_or(data < valid_range[0], data > valid_range[1])
+    invalid = np.logical_or(invalid, data == _FillValue)
+    data[invalid] = np.nan
+    data = (data - add_offset) * scale_factor
+    data = np.ma.masked_array(data, np.isnan(data))
 
-    return latitudes, longitudes
+    # Construct the grid.  The needed information is in a global attribute
+    # called 'StructMetadata.0'.  Use regular expressions to tease out the
+    # extents of the grid.
+    fattrs = arquivo.attributes(full=1)
+    ga = fattrs["StructMetadata.0"]
+    gridmeta = ga[0]
+    ul_regex = re.compile(r'''UpperLeftPointMtrs=\(
+                                  (?P<upper_left_x>[+-]?\d+\.\d+)
+                                  ,
+                                  (?P<upper_left_y>[+-]?\d+\.\d+)
+                                  \)''', re.VERBOSE)
+
+    match = ul_regex.search(gridmeta)
+    x0 = np.float(match.group('upper_left_x'))
+    y0 = np.float(match.group('upper_left_y'))
+
+    lr_regex = re.compile(r'''LowerRightMtrs=\(
+                                  (?P<lower_right_x>[+-]?\d+\.\d+)
+                                  ,
+                                  (?P<lower_right_y>[+-]?\d+\.\d+)
+                                  \)''', re.VERBOSE)
+    match = lr_regex.search(gridmeta)
+    x1 = np.float(match.group('lower_right_x'))
+    y1 = np.float(match.group('lower_right_y'))
+
+    nx, ny = data.shape
+    x = np.linspace(x0, x1, nx)
+    y = np.linspace(y0, y1, ny)
+    xv, yv = np.meshgrid(x, y)
+
+    sinu = pyproj.Proj("+proj=sinu +R=6371007.181 +nadgrids=@null +wktext")
+    wgs84 = pyproj.Proj("+init=EPSG:4326")
+    lon, lat = pyproj.transform(sinu, wgs84, xv, yv)
+    return lat, lon
