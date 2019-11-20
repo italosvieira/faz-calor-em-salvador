@@ -1,0 +1,36 @@
+<section class="hero is-primary">
+  <div class="hero-body">
+    <div class="container">
+      <h1 class="title">
+        Primary title
+      </h1>
+      <h2 class="subtitle">
+        Primary subtitle
+      </h2>
+    </div>
+  </div>
+</section>
+
+<div class="tabs is-centered is-boxed is-medium">
+  <ul>
+    <li [className]="abaSelecionada == 1 ? 'is-active' : ''" (click)="selecionarAba(1)">
+      <a>
+        <span class="icon is-small"><fa-icon [icon]="faMapMarkedAlt"></fa-icon></span>
+        <span>Mapa</span>
+      </a>
+    </li>
+    <li [className]="abaSelecionada == 2 ? 'is-active' : ''" (click)="selecionarAba(2)">
+      <a>
+        <span class="icon is-small"><fa-icon [icon]="faChartPie"></fa-icon></span>
+        <span>Estatísticas</span>
+      </a>
+    </li>
+    <li [className]="abaSelecionada == 3 ? 'is-active' : ''" (click)="selecionarAba(3)">
+      <a>
+        <span class="icon is-small"><fa-icon [icon]="faInfoCircle"></fa-icon></span>
+        <span>Sobre</span>
+      </a>
+    </li>
+  </ul>
+</div>
+<router-outlet></router-outlet>
