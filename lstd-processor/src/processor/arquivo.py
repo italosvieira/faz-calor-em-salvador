@@ -2,6 +2,7 @@ import glob
 import json
 import logging
 import re
+from multiprocessing import Pool, cpu_count
 
 import mpl_toolkits.basemap.pyproj as pyproj
 import numpy as np
@@ -10,6 +11,8 @@ from shapely.geometry import Point
 
 import src.processor.dados_cientificos as dados_cientificos_processor
 import src.processor.metadados as metadados_processor
+import src.service.metadados as metadados_service
+import src.service.dados_cientificos as dados_cientificos_service
 
 
 def iniciar_processamento_de_arquivos():
@@ -19,8 +22,8 @@ def iniciar_processamento_de_arquivos():
 
     logging.info("Arquivos a serem processados: " + ", ".join(map(lambda f: sanitizar_nome_arquivo(f), lista_arquivos)))
 
-    for nome_arquivo in lista_arquivos:
-        processar_arquivo(nome_arquivo)
+    with Pool(cpu_count() - 1) as pool:
+        pool.map(processar_arquivo, lista_arquivos)
 
 
 def obter_lista_arquivos():
@@ -55,11 +58,11 @@ def processar_arquivo(nome_arquivo):
 
 
 def processar_grid(arquivo, nome_arquivo, metadados, dados_cientificos):
-    latitudes, longitudes = gerar_matriz_coordenadas(arquivo)
+    longitudes, latitudes = gerar_matriz_coordenadas(arquivo)
     index, lista_poligos_bairro = dados_cientificos_processor.obter_bairros_como_poligonos()
     dados_temperatura_dia = dados_cientificos["dados_temperatura_dia"]
     dados_temperatura_noite = dados_cientificos["dados_temperatura_noite"]
-    # metadados_id = metadados_service.get_medatados_id_by_nome_arquivo_or_insert(metadados)
+    metadados_id = metadados_service.get_medatados_id_by_nome_arquivo_or_insert(metadados)
 
     for linha in range(1200):
         for coluna in range(1200):
@@ -75,7 +78,7 @@ def processar_grid(arquivo, nome_arquivo, metadados, dados_cientificos):
 
             lst_dados_cientificos = {
                 "id_bairro": id_bairro,
-                "id_metadados": "",
+                "id_metadados": metadados_id,
                 "latitude": latitude,
                 "longitude": longitude,
                 "temperatura_dia": dados_cientificos_processor.processar_temperatura(linha, coluna, dados_temperatura_dia["indicador_temperatura"]),
@@ -87,70 +90,25 @@ def processar_grid(arquivo, nome_arquivo, metadados, dados_cientificos):
             }
 
             if id_bairro is not None:
-                # logging.info(nome_arquivo + ": Salvando no banco de dados o registro: " + json.dumps(lst_dados_cientificos))
+                logging.info(nome_arquivo + ": Salvando no banco de dados o registro: " + json.dumps(lst_dados_cientificos))
                 # id_dado_cientifico = dados_cientificos_service.save(lst_dados_cientificos)
                 # logging.info(nome_arquivo + ": Registro salvo na tabela lstd_dados_cientificos com o id: " + str(id_dado_cientifico))
-                logging.info("Bairro: %s. Temperatura Dia: %s. Temperatura Noite: %s. Latitude: %s. Longitude: %s",
-                             lst_dados_cientificos["id_bairro"],
-                             lst_dados_cientificos["temperatura_dia"], lst_dados_cientificos["temperatura_noite"],
-                             lst_dados_cientificos["latitude"], lst_dados_cientificos["longitude"])
 
 
 def gerar_matriz_coordenadas(arquivo):
-    data2D = arquivo.select("LST_Day_1km")
-    data = data2D[:, :].astype(np.double)
+    gridmeta = arquivo.attributes(full=1)["StructMetadata.0"][0]
 
-    # Read attributes.
-    attrs = data2D.attributes(full=1)
-    lna = attrs["long_name"]
-    long_name = lna[0]
-    vra = attrs["valid_range"]
-    valid_range = vra[0]
-    fva = attrs["_FillValue"]
-    _FillValue = fva[0]
-    sfa = attrs["scale_factor"]
-    scale_factor = sfa[0]
-    aoa = attrs["add_offset"]
-    add_offset = aoa[0]
-
-    # Apply the attributes to the data.
-    invalid = np.logical_or(data < valid_range[0], data > valid_range[1])
-    invalid = np.logical_or(invalid, data == _FillValue)
-    data[invalid] = np.nan
-    data = (data - add_offset) * scale_factor
-    data = np.ma.masked_array(data, np.isnan(data))
-
-    # Construct the grid.  The needed information is in a global attribute
-    # called 'StructMetadata.0'.  Use regular expressions to tease out the
-    # extents of the grid.
-    fattrs = arquivo.attributes(full=1)
-    ga = fattrs["StructMetadata.0"]
-    gridmeta = ga[0]
-    ul_regex = re.compile(r'''UpperLeftPointMtrs=\(
-                                  (?P<upper_left_x>[+-]?\d+\.\d+)
-                                  ,
-                                  (?P<upper_left_y>[+-]?\d+\.\d+)
-                                  \)''', re.VERBOSE)
-
-    match = ul_regex.search(gridmeta)
+    match = re.compile(r'''UpperLeftPointMtrs=\((?P<upper_left_x>[+-]?\d+\.\d+), (?P<upper_left_y>[+-]?\d+\.\d+)\)''', re.VERBOSE).search(gridmeta)
     x0 = np.float(match.group('upper_left_x'))
     y0 = np.float(match.group('upper_left_y'))
 
-    lr_regex = re.compile(r'''LowerRightMtrs=\(
-                                  (?P<lower_right_x>[+-]?\d+\.\d+)
-                                  ,
-                                  (?P<lower_right_y>[+-]?\d+\.\d+)
-                                  \)''', re.VERBOSE)
-    match = lr_regex.search(gridmeta)
+    match = re.compile(r'''LowerRightMtrs=\((?P<lower_right_x>[+-]?\d+\.\d+), (?P<lower_right_y>[+-]?\d+\.\d+)\)''', re.VERBOSE).search(gridmeta)
     x1 = np.float(match.group('lower_right_x'))
     y1 = np.float(match.group('lower_right_y'))
 
-    nx, ny = data.shape
+    nx, ny = arquivo.select("LST_Day_1km")[:, :].astype(np.double).shape
     x = np.linspace(x0, x1, nx)
     y = np.linspace(y0, y1, ny)
     xv, yv = np.meshgrid(x, y)
 
-    sinu = pyproj.Proj("+proj=sinu +R=6371007.181 +nadgrids=@null +wktext")
-    wgs84 = pyproj.Proj("+init=EPSG:4326")
-    lon, lat = pyproj.transform(sinu, wgs84, xv, yv)
-    return lat, lon
+    return pyproj.transform(pyproj.Proj("+proj=sinu +R=6371007.181 +nadgrids=@null +wktext"), pyproj.Proj("+init=EPSG:4326"), xv, yv)

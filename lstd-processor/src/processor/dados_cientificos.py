@@ -85,7 +85,7 @@ def processar_temperatura(linha, coluna, indicador_temperatura):
     if temperatura == indicador_temperatura["valor_de_preenchemento"] or (indicador_temperatura["valor_valido_maximo"] < temperatura < indicador_temperatura["valor_valido_minimo"]):
         return None
 
-    return (temperatura * indicador_temperatura["fator_escalar"]) - 273.15
+    return "{0:.2f}".format((temperatura * indicador_temperatura["fator_escalar"]) - 273.15)
 
 
 def processar_qualidade_do_pixel(linha, coluna, indicador_qualidade):
