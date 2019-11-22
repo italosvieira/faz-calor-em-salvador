@@ -1,4 +1,4 @@
-<section class="hero is-info is-medium" [style.background]="'url(/assets/images/' + this.banner + ')'">
+<section class="hero is-info is-medium banner-img" [style.background-image]="getBackGround()">
   <div class="hero-body">
     <div class="container has-text-centered">
       <p class="title">
@@ -37,4 +37,7 @@
     </nav>
   </div>
 </section>
-<router-outlet></router-outlet>
+
+<section>
+  <router-outlet></router-outlet>
+</section>

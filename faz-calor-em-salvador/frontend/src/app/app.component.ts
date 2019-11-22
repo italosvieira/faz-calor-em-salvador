@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {faChartPie, faInfoCircle, faMapMarkedAlt} from '@fortawesome/free-solid-svg-icons';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 import {NavigationEnd, Router} from '@angular/router';
+import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +10,7 @@ import {NavigationEnd, Router} from '@angular/router';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  constructor(private router: Router, public breakpointObserver: BreakpointObserver) {}
+  constructor(private router: Router, public breakpointObserver: BreakpointObserver, private sanitizer: DomSanitizer) {}
 
   banner;
   abaSelecionada;
@@ -17,8 +18,12 @@ export class AppComponent implements OnInit {
   faChartPie = faChartPie;
   faInfoCircle = faInfoCircle;
 
+  getBackGround() {
+    return this.sanitizer.bypassSecurityTrustStyle(`url(/assets/images/${this.banner})`);
+  }
+
   ngOnInit(): void {
-    this.banner = 'banner.jpg';
+    this.banner = 'banner2.jpg';
 
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
