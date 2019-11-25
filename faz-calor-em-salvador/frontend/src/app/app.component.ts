@@ -2,15 +2,15 @@ import {Component, OnInit} from '@angular/core';
 import {faChartPie, faInfoCircle, faMapMarkedAlt} from '@fortawesome/free-solid-svg-icons';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 import {NavigationEnd, Router} from '@angular/router';
-import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
+import {DomSanitizer} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  constructor(private router: Router, public breakpointObserver: BreakpointObserver, private sanitizer: DomSanitizer) {}
+  constructor(private router: Router, private breakpointObserver: BreakpointObserver, private sanitizer: DomSanitizer) {}
 
   banner;
   abaSelecionada;
