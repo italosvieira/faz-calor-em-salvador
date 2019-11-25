@@ -1,54 +1,142 @@
-<section>
-  <div class="box" >
+<div class="box">
+  <div class="field is-grouped is-grouped-multiline is-grouped-centered">
+    <div class="control has-icons-left">
+      <label class="label">Visualização</label>
+      <div class="select is-rounded">
+        <select [(ngModel)]="filtro.visualizacao">
+          <option *ngFor="let visualizacao of visualizacoes">{{ visualizacao }}</option>
+        </select>
+        <span class="icon"><fa-icon [icon]="faEye"></fa-icon></span>
+      </div>
+    </div>
+
+    <div class="control has-icons-left">
+      <label class="label">Bairro</label>
+      <div class="select is-rounded">
+        <select [(ngModel)]="filtro.bairro">
+          <option *ngFor="let bairro of bairros" [ngValue]="bairro">{{ bairro.nome }}</option>
+        </select>
+        <span class="icon"><fa-icon [icon]="faDrawPolygon"></fa-icon></span>
+      </div>
+    </div>
+
+    <!--<div class="control has-icons-left">
+      <label class="label">Intervalo</label>
       <div class="select is-rounded">
         <select>
-          <option>Rounded dropdown</option>
+          <option>Select dropdown</option>
           <option>With options</option>
         </select>
+        <span class="icon"><fa-icon [icon]="faCalendarAlt"></fa-icon></span>
       </div>
-  </div>
-</section>
+    </div>-->
 
-<section>
-  <div class="box" >
-    <div class="select is-rounded">
-      <select>
-        <option>Rounded dropdown</option>
-        <option>With options</option>
-      </select>
+    <div class="control" style="width: 150px; margin-right: .75rem;">
+      <label class="label">Data</label>
+      <div class="control has-icons-right">
+        <input class="input is-rounded" type="text" [(ngModel)]="filtro.data"
+               #dp="angular-mydatepicker" (click)="dp.toggleCalendar()"
+               angular-mydatepicker [options]="dataOptions"/>
+        <span class="icon is-small is-right"><fa-icon [icon]="faCalendarAlt"></fa-icon></span>
+      </div>
     </div>
   </div>
-</section>
 
-<section>
-  <div class="box" >
-    <div class="select is-rounded">
-      <select>
-        <option>Rounded dropdown</option>
-        <option>With options</option>
-      </select>
+  <div class="field is-grouped is-grouped-centered">
+    <div class="control">
+      <button (click)="filtrar()" class="button is-link is-rounded">
+        <span class="icon"><fa-icon [icon]="faFilter"></fa-icon></span>
+        <span>Filtrar</span>
+      </button>
+    </div>
+
+    <div class="control">
+      <button (click)="limpar()" class="button is-warning is-rounded">
+        <span class="icon"><fa-icon [icon]="faEraser"></fa-icon></span>
+        <span>Limpar</span>
+      </button>
     </div>
   </div>
-</section>
+</div>
 
-<section>
-  <div class="box" >
-    <div class="select is-rounded">
-      <select>
-        <option>Rounded dropdown</option>
-        <option>With options</option>
-      </select>
+<div class="columns">
+  <div class="column is-one-fifth">
+    <div class="box" style="height: 100%">
+      <nav class="level">
+        <div class="level-item has-text-centered" style="border-bottom: 1px solid;">
+          <p class="title">Legenda</p>
+        </div>
+      </nav>
+      <nav class="level">
+        <div class="level-left some-responsive-thing">
+          <div class="level-item">
+            <span class="icon">
+                <fa-icon [icon]="faCircle" [styles]="{'color': '#bd0026'}" size="2x"></fa-icon>
+              </span>
+          </div>
+          <div class="level-item">
+            <p class="heading">Área de maior temperatura</p>
+          </div>
+        </div>
+      </nav>
+
+      <nav class="level">
+        <div class="level-left some-responsive-thing">
+          <div class="level-item">
+            <span class="icon">
+                <fa-icon [icon]="faCircle" [styles]="{'color': '#ffffb2'}" size="2x"></fa-icon>
+              </span>
+          </div>
+          <div class="level-item">
+            <p class="heading">Área de menor temperatura</p>
+          </div>
+        </div>
+      </nav>
+
+      <nav class="level">
+        <div class="level-left some-responsive-thing">
+          <div class="level-item">
+            <span class="icon">
+                <fa-icon [icon]="faBroadcastTower" [styles]="{'color': 'black'}" size="2x"></fa-icon>
+              </span>
+          </div>
+          <div class="level-item">
+            <p class="heading">Estação automática rádio marinha</p>
+          </div>
+        </div>
+      </nav>
+
+      <nav class="level">
+        <div class="level-left some-responsive-thing">
+          <div class="level-item">
+            <span class="icon">
+                <fa-icon [icon]="faBroadcastTower" [styles]="{'color': 'black'}" size="2x"></fa-icon>
+              </span>
+          </div>
+          <div class="level-item">
+            <p class="heading">Estação automática ondina</p>
+          </div>
+        </div>
+      </nav>
+
+      <nav class="level">
+        <div class="level-left some-responsive-thing">
+          <div class="level-item">
+            <span class="icon">
+                <fa-icon [icon]="faBroadcastTower" [styles]="{'color': 'black'}" size="2x"></fa-icon>
+              </span>
+          </div>
+          <div class="level-item">
+            <p class="heading">Estação manual ondina</p>
+          </div>
+        </div>
+      </nav>
     </div>
   </div>
-</section>
 
-<section>
-  <div class="box" >
-    <div class="select is-rounded">
-      <select>
-        <option>Rounded dropdown</option>
-        <option>With options</option>
-      </select>
+  <div class="column">
+    <div class="box">
+      <div id="map" style="height: 600px"></div>
     </div>
   </div>
-</section>
+</div>

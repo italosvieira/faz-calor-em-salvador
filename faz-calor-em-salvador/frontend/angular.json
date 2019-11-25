@@ -24,9 +24,7 @@
               "src/assets"
             ],
             "styles": [
-              "node_modules/bulma/css/bulma.min.css",
-              "node_modules/leaflet/dist/leaflet.css",
-              "src/styles.css"
+              "src/styles.scss"
             ],
             "scripts": []
           },
@@ -91,7 +89,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.scss"
             ],
             "scripts": []
           }
@@ -122,6 +120,12 @@
           }
         }
       }
-    }},
-  "defaultProject": "faz-calor-em-salvador"
+    }
+  },
+  "defaultProject": "faz-calor-em-salvador",
+  "schematics": {
+    "@schematics/angular:component": {
+      "styleext": "scss"
+    }
+  }
 }
