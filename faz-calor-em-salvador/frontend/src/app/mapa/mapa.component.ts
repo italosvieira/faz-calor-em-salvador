@@ -1,4 +1,4 @@
-import {Map, tileLayer} from 'leaflet';
+import * as L from 'leaflet';
 import {AfterViewInit, Component, OnInit} from '@angular/core';
 
 @Component({
@@ -6,22 +6,17 @@ import {AfterViewInit, Component, OnInit} from '@angular/core';
   templateUrl: './mapa.component.html',
   styleUrls: ['./mapa.component.css']
 })
-export class MapaComponent implements AfterViewInit {
+export class MapaComponent implements OnInit {
   constructor() {}
 
   private mapa;
 
-  ngAfterViewInit(): void {
-    this.mapa = new Map('map', {
-      center: [ 39.8282, -98.5795 ],
-      zoom: 3
-    });
-
-    const tiles = tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    });
-
-    tiles.addTo(this.mapa);
+  ngOnInit(): void {
+    // this.mapa = L.map('map').setView([46.879966, -121.726909], 7);
+    //
+    // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //   attribution:
+    //     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    // }).addTo(this.mapa);
   }
 }

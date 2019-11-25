@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {faChartPie, faInfoCircle, faMapMarkedAlt} from '@fortawesome/free-solid-svg-icons';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 import {NavigationEnd, Router} from '@angular/router';
-import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
+import {DomSanitizer} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-root',
@@ -11,6 +11,11 @@ import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browse
 })
 export class AppComponent implements OnInit {
   constructor(private router: Router, public breakpointObserver: BreakpointObserver, private sanitizer: DomSanitizer) {}
+
+  // Classes
+  tamanhoTabs;
+  tamanhoBanner;
+  alinhamentoTextoTitulo;
 
   banner;
   abaSelecionada;
@@ -48,18 +53,38 @@ export class AppComponent implements OnInit {
       Breakpoints.XLarge
     ]).subscribe(result => {
       if (result.breakpoints[Breakpoints.XSmall]) {
+        console.log('Is XSmall');
+        this.tamanhoBanner = 'is-medium';
+        this.tamanhoTabs = 'is-small';
+        this.alinhamentoTextoTitulo = 'is-centered';
         // max-width = 599.99px
       }
       if (result.breakpoints[Breakpoints.Small]) {
+        console.log('Is Small');
+        this.tamanhoBanner = 'is-medium';
+        this.tamanhoTabs = 'is-medium';
+        this.alinhamentoTextoTitulo = 'is-centered';
         // min-width = 600px and max-width = 959.99px
       }
       if (result.breakpoints[Breakpoints.Medium]) {
+        console.log('Is Medium');
+        this.tamanhoBanner = 'is-medium';
+        this.tamanhoTabs = 'is-medium';
+        this.alinhamentoTextoTitulo = '';
         // 960px and max-width = 1279.99px
       }
       if (result.breakpoints[Breakpoints.Large]) {
+        console.log('Is Large');
+        this.tamanhoBanner = 'is-medium';
+        this.tamanhoTabs = 'is-medium';
+        this.alinhamentoTextoTitulo = '';
         // 1280px and max-width = 1919.99px
       }
       if (result.breakpoints[Breakpoints.XLarge]) {
+        console.log('Is XLarge');
+        this.tamanhoBanner = 'is-large';
+        this.tamanhoTabs = 'is-large';
+        this.alinhamentoTextoTitulo = '';
         // 1920px
       }
     });

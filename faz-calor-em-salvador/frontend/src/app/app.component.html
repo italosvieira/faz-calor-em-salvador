@@ -1,34 +1,31 @@
-<section class="hero is-info is-medium banner-img" [style.background-image]="getBackGround()">
+<section class="hero is-info banner-img" [style.background-image]="getBackGround()" [ngClass]="tamanhoBanner">
   <div class="hero-body">
-    <div class="container has-text-centered">
-      <p class="title">
+    <div class="container">
+      <p class="title hero-title-gradient" [ngClass]="alinhamentoTextoTitulo">
         Faz Calor Em Salvador
       </p>
-<!--      <p class="subtitle">-->
-<!--        Subtitle-->
-<!--      </p>-->
     </div>
   </div>
 
   <div class="hero-foot">
-    <nav class="tabs is-boxed is-fullwidth">
+    <nav class="tabs is-boxed is-fullwidth" [ngClass]="tamanhoTabs">
       <div class="container">
         <ul>
           <li [className]="abaSelecionada == 1 ? 'is-active' : ''" (click)="selecionarAba(1)">
             <a>
-              <span class="icon is-small"><fa-icon [icon]="faMapMarkedAlt"></fa-icon></span>
+              <span class="icon"><fa-icon [icon]="faMapMarkedAlt"></fa-icon></span>
               <span>Mapa</span>
             </a>
           </li>
           <li [className]="abaSelecionada == 2 ? 'is-active' : ''" (click)="selecionarAba(2)">
             <a>
-              <span class="icon is-small"><fa-icon [icon]="faChartPie"></fa-icon></span>
+              <span class="icon"><fa-icon [icon]="faChartPie"></fa-icon></span>
               <span>Estatísticas</span>
             </a>
           </li>
           <li [className]="abaSelecionada == 3 ? 'is-active' : ''" (click)="selecionarAba(3)">
             <a>
-              <span class="icon is-small"><fa-icon [icon]="faInfoCircle"></fa-icon></span>
+              <span class="icon"><fa-icon [icon]="faInfoCircle"></fa-icon></span>
               <span>Sobre</span>
             </a>
           </li>
@@ -38,6 +35,4 @@
   </div>
 </section>
 
-<section>
-  <router-outlet></router-outlet>
-</section>
+<router-outlet></router-outlet>
