@@ -15,7 +15,6 @@ export class AppComponent implements OnInit {
   // Classes
   tamanhoTabs;
   tamanhoBanner;
-  alinhamentoTextoTitulo;
 
   banner;
   abaSelecionada;
@@ -56,35 +55,30 @@ export class AppComponent implements OnInit {
         console.log('Is XSmall');
         this.tamanhoBanner = 'is-medium';
         this.tamanhoTabs = 'is-small';
-        this.alinhamentoTextoTitulo = 'is-centered';
         // max-width = 599.99px
       }
       if (result.breakpoints[Breakpoints.Small]) {
         console.log('Is Small');
         this.tamanhoBanner = 'is-medium';
         this.tamanhoTabs = 'is-medium';
-        this.alinhamentoTextoTitulo = 'is-centered';
         // min-width = 600px and max-width = 959.99px
       }
       if (result.breakpoints[Breakpoints.Medium]) {
         console.log('Is Medium');
         this.tamanhoBanner = 'is-medium';
         this.tamanhoTabs = 'is-medium';
-        this.alinhamentoTextoTitulo = '';
         // 960px and max-width = 1279.99px
       }
       if (result.breakpoints[Breakpoints.Large]) {
         console.log('Is Large');
         this.tamanhoBanner = 'is-medium';
         this.tamanhoTabs = 'is-medium';
-        this.alinhamentoTextoTitulo = '';
         // 1280px and max-width = 1919.99px
       }
       if (result.breakpoints[Breakpoints.XLarge]) {
         console.log('Is XLarge');
         this.tamanhoBanner = 'is-large';
         this.tamanhoTabs = 'is-large';
-        this.alinhamentoTextoTitulo = '';
         // 1920px
       }
     });
@@ -132,24 +126,36 @@ export class AppComponent implements OnInit {
   //   }
   }
 
-  selecionarAba(aba: number): void {
+  async selecionarAba(aba: number) {
+    /*window.scrollTo(0, document.body.scrollHeight);*/
+
     if (aba) {
       if (aba === 1) {
         this.abaSelecionada = 1;
-        this.router.navigate(['']);
+        await this.router.navigate(['']);
+        this.scrollToView('filtro');
         return;
       } else if (aba === 2) {
         this.abaSelecionada = 2;
-        this.router.navigate(['estatisticas']);
+        await this.router.navigate(['estatisticas']);
         return;
       } else if (aba === 3) {
         this.abaSelecionada = 3;
-        this.router.navigate(['sobre']);
+        await this.router.navigate(['sobre']);
         return;
       }
     }
 
     this.abaSelecionada = 1;
-    this.router.navigate(['mapa']);
+    await this.router.navigate(['']);
+    this.scrollToView('filtro');
+  }
+
+  private scrollToView(id: string): void {
+    const element = document.getElementById(id);
+
+    if (element) {
+      element.scrollIntoView();
+    }
   }
 }

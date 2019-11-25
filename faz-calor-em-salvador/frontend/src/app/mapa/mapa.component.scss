@@ -2,9 +2,14 @@
 
 .some-responsive-thing {
   @include mobile {
-    display: flex;
-    justify-content: space-around;
+    /*display: flex;
+    justify-content: space-around;*/
   }
+}
+
+.myDivIcon {
+  text-align: center; /* Horizontally center the text (icon) */
+  line-height: 20px; /* Vertically center the text (icon) */
 }
 
 .info-batata {
@@ -26,4 +31,23 @@
   float: left;
   margin-right: 8px;
   opacity: 0.7;
+}
+
+.legenda-titulo {
+  margin-bottom: 10px;
+  border-bottom: 1px solid;
+}
+
+.legenda-item {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px
+}
+
+.legenda-text {
+  margin-left: 10px;
+}
+
+.legenda-box {
+  height: 100%;
 }

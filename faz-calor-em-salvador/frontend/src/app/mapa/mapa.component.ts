@@ -1,4 +1,4 @@
-import {Map, marker, tileLayer, geoJSON, circleMarker, control, circle} from 'leaflet';
+import {Map, marker, tileLayer, geoJSON, circleMarker, control, circle, divIcon, DomUtil} from 'leaflet';
 import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {faBroadcastTower, faCalendarAlt, faDrawPolygon, faEraser, faEye, faFilter} from '@fortawesome/free-solid-svg-icons';
@@ -60,13 +60,18 @@ export class MapaComponent implements OnInit, AfterViewInit {
   mapaPontos = [];
 
   ngOnInit(): void {
-    this.filtro = new Filtro(null, null, null);
+    // FIXME remover o valor de bairro, colocar null.
+    this.visualizacoes = ['Semanal'];
+    this.bairros = [{id: '1', nome: 'Centro Administrativo da Bahia'}];
+    this.filtro = new Filtro('Semanal', {id: '1', nome: 'Centro Administrativo da Bahia'}, null);
 
     this.service.getFiltro().subscribe((data: FiltroDTO) => {
       this.visualizacoes =  data.visualizacoes;
       this.bairros = data.bairros;
-      this.limpar();
-    });
+      this.inicializarFiltro();
+    }, error => {{
+      console.log(error);
+    }});
   }
 
   ngAfterViewInit(): void {
@@ -120,16 +125,14 @@ export class MapaComponent implements OnInit, AfterViewInit {
     tiles.addTo(this.mapa);
 
 
-    /*const fontAwesomeIcon = divIcon({
-      html: `<fa-icon [icon]="faCircle"></fa-icon>`,
+    const fontAwesomeIcon = divIcon({
+      html: `<fa-icon [icon]="faBroadcastTower"></fa-icon>`,
       iconSize: [20, 20],
       className: 'myDivIcon'
     });
 
-    const teste = DomUtil.create('i');
-
     marker([-12.808222, -38.495944], {icon:  fontAwesomeIcon})
-    .addTo(this.mapa).bindPopup('A pretty CSS3 popup.<br> Easily customizable.');*/
+    .addTo(this.mapa).bindPopup('A pretty CSS3 popup.<br> Easily customizable.');
 
     marker([-12.808222, -38.495944]).addTo(this.mapa).bindPopup('Estação Automática Rádio Marinha.');
     marker([-13.005515, -38.505760]).addTo(this.mapa).bindPopup('Estação Automática Ondina');
@@ -181,7 +184,8 @@ export class MapaComponent implements OnInit, AfterViewInit {
   }
 
   filtrar(): void {
-    console.log(this.filtro);
+    this.scrollToView('map');
+
     this.service.postFiltro(this.filtro).subscribe((data: any) => {
       this.limparLayersMapa();
       this.adicionarLayerBairroNoMapa(data);
@@ -230,9 +234,7 @@ export class MapaComponent implements OnInit, AfterViewInit {
     return 'black';
   }*/
 
-  limpar(): void {
-    this.limparLayersMapa();
-
+  private inicializarFiltro(): void {
     const date = new Date();
     const visualizacao = this.visualizacoes ? this.visualizacoes[0] : null;
     const bairro = this.bairros ? this.bairros[0] : null;
@@ -251,5 +253,18 @@ export class MapaComponent implements OnInit, AfterViewInit {
       },
       dateRange: null
     });
+  }
+
+  limpar(): void {
+    this.limparLayersMapa();
+    this.scrollToView('filtro');
+  }
+
+  private scrollToView(id: string): void {
+    const element = document.getElementById(id);
+
+    if (element) {
+      element.scrollIntoView();
+    }
   }
 }

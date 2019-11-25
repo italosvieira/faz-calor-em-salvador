@@ -1,7 +1,7 @@
 <section class="hero is-info banner-img" [style.background-image]="getBackGround()" [ngClass]="tamanhoBanner">
   <div class="hero-body">
     <div class="container">
-      <p class="title hero-title-gradient" [ngClass]="alinhamentoTextoTitulo">
+      <p class="title hero-title-gradient">
         Faz Calor Em Salvador
       </p>
     </div>
@@ -12,19 +12,19 @@
       <div class="container">
         <ul>
           <li [className]="abaSelecionada == 1 ? 'is-active' : ''" (click)="selecionarAba(1)">
-            <a>
+            <a [class.background-color-white-smoke]="abaSelecionada == 1">
               <span class="icon"><fa-icon [icon]="faMapMarkedAlt"></fa-icon></span>
               <span>Mapa</span>
             </a>
           </li>
-          <li [className]="abaSelecionada == 2 ? 'is-active' : ''" (click)="selecionarAba(2)">
-            <a>
+         <!-- <li [className]="abaSelecionada == 2 ? 'is-active' : ''" (click)="selecionarAba(2)">
+            <a [class.background-color-white-smoke]="abaSelecionada == 2">
               <span class="icon"><fa-icon [icon]="faChartPie"></fa-icon></span>
               <span>Estatísticas</span>
             </a>
-          </li>
+          </li>-->
           <li [className]="abaSelecionada == 3 ? 'is-active' : ''" (click)="selecionarAba(3)">
-            <a>
+            <a [class.background-color-white-smoke]="abaSelecionada == 3">
               <span class="icon"><fa-icon [icon]="faInfoCircle"></fa-icon></span>
               <span>Sobre</span>
             </a>
@@ -36,7 +36,7 @@
 </section>
 
 <section>
-  <div class="box">
+  <div class="box background-color-white-smoke">
     <router-outlet></router-outlet>
   </div>
 </section>

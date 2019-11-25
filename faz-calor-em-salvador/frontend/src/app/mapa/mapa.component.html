@@ -1,4 +1,4 @@
-<div class="box">
+<div id="filtro" class="box">
   <div class="field is-grouped is-grouped-multiline is-grouped-centered">
     <div class="control has-icons-left">
       <label class="label">Visualização</label>
@@ -10,7 +10,7 @@
       </div>
     </div>
 
-    <div class="control has-icons-left">
+    <div class="control has-icons-left" style="max-width: 100%;">
       <label class="label">Bairro</label>
       <div class="select is-rounded">
         <select [(ngModel)]="filtro.bairro">
@@ -61,8 +61,27 @@
 
 <div class="columns">
   <div class="column is-one-fifth">
-    <div class="box" style="height: 100%">
-      <nav class="level">
+    <div class="box legenda-box">
+      <div class="container legenda-titulo">
+        <p class="title has-text-centered">Legenda</p>
+      </div>
+
+      <div class="container legenda-item">
+        <span class="icon">
+          <fa-icon [icon]="faCircle" [styles]="{'color': '#bd0026'}" size="2x"></fa-icon>
+        </span>
+        <span class="heading legenda-text">Área de maior temperatura</span>
+      </div>
+
+      <div class="container legenda-item">
+        <span class="icon">
+          <fa-icon [icon]="faCircle" [styles]="{'color': '#ffffb2'}" size="2x"></fa-icon>
+        </span>
+        <span class="heading legenda-text" >Área de menor temperatura</span>
+        <!--<p class="heading">Área de menor temperatura</p>-->
+      </div>
+
+      <!--<nav class="level">
         <div class="level-item has-text-centered" style="border-bottom: 1px solid;">
           <p class="title">Legenda</p>
         </div>
@@ -101,7 +120,7 @@
               </span>
           </div>
           <div class="level-item">
-            <p class="heading">Estação automática rádio marinha</p>
+            <p class="heading is-size-7-mobile">Estação automática rádio marinha</p>
           </div>
         </div>
       </nav>
@@ -130,7 +149,7 @@
             <p class="heading">Estação manual ondina</p>
           </div>
         </div>
-      </nav>
+      </nav>-->
     </div>
   </div>
 
