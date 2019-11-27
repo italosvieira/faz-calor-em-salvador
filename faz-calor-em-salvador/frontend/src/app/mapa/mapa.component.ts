@@ -149,7 +149,7 @@ export class MapaComponent implements OnInit, AfterViewInit {
         }
       });
 
-      layer.addTo(this.mapa).on('click', () => {
+      layer.on('click', () => {
         const circleLayer = circle([ponto.geometry.coordinates[1], ponto.geometry.coordinates[0]], {
           color: 'red',
           fillColor: '#f03',
@@ -163,6 +163,14 @@ export class MapaComponent implements OnInit, AfterViewInit {
         }
       });
 
+      layer.getPopup().on('remove', () => {
+        if (this.mapaCirculo) {
+          this.mapa.removeLayer(this.mapaCirculo);
+          this.mapaCirculo = null;
+        }
+      });
+
+      layer.addTo(this.mapa);
       this.mapaPontos.push(layer);
     }
   }
