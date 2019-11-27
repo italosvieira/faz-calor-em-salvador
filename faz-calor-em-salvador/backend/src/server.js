@@ -5,11 +5,11 @@ const koaBodyParser = require('koa-bodyparser')
 const KoaResponseTime = require('koa-response-time')
 const KoaLogger = require('koa-logger')
 
-const ExceptionHandler = require('./middleware/exceptionHandler')
+const ExceptionHandler = require('./middleware/exception-handler')
 const Database = require('./config/database')
 
 const logger = require('./config/winston')
-const publicRoutes = require('./routes/publicRouter')
+const publicRoutes = require('./routes/public-router')
 
 async function start () {
   await Database()

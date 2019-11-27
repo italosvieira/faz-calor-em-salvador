@@ -1,6 +1,6 @@
 const KoaRouter = require('koa-router')
 
-const service = require('../services/mapaService')
+const service = require('../services/mapa-service')
 const router = new KoaRouter({ prefix: '/api/public' })
 
 router.get('/filtro', service.get)

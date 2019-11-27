@@ -1,5 +1,5 @@
 const logger = require('../config/winston')
-const BusinessException = require('../exceptions/businessException')
+const BusinessException = require('../exceptions/business-exception')
 
 module.exports = function () {
   return async (ctx, next) => {
