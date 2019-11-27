@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import { environment } from '../../environments/environment';
-import {Filtro} from '../model/filtro';
+import {FiltroModel} from '../model/filtro.model';
+import {environment} from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,7 @@ export class MapaService {
     return this.http.get(environment.apiUrlPublic + 'filtro');
   }
 
-  postFiltro(filtro: Filtro) {
+  postFiltro(filtro: FiltroModel) {
     return this.http.post(environment.apiUrlPublic + 'filtro', filtro);
   }
 }

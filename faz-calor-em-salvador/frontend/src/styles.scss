@@ -1,5 +1,6 @@
 @import "~bulma/bulma";
 @import "~leaflet/dist/leaflet.css";
+@import "~@fortawesome/fontawesome-free/css/all.min.css";
 
 html, body {
   height: 100%;
@@ -12,4 +13,28 @@ body {
   font-family: Roboto,
   "Helvetica Neue",
   sans-serif;
+}
+
+.mapa-tooltip {
+  background-color: transparent !important;
+  border: transparent !important;
+  box-shadow: none !important;
+  color: #3388ff;
+}
+
+.mapa-icone {
+  margin-left: -14.5px !important;
+}
+
+.mapa-icone-estacao-radio-marinha-cor {
+  color: #3273dc;
+}
+
+.mapa-icone-estacao-convencional-cor {
+  color: #0a984c;
+}
+
+.mapa-icone-marker {
+  margin-left: -10.5px !important;
+  color: red;
 }

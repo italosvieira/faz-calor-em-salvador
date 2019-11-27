@@ -1,13 +1,11 @@
-import {Map, marker, tileLayer, geoJSON, circleMarker, control, circle, divIcon, DomUtil} from 'leaflet';
+import {circle, control, divIcon, geoJSON, Map, marker, tileLayer} from 'leaflet';
 import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {BreakpointObserver} from '@angular/cdk/layout';
-import {faBroadcastTower, faCalendarAlt, faDrawPolygon, faEraser, faEye, faFilter} from '@fortawesome/free-solid-svg-icons';
-import {faCircle} from '@fortawesome/free-regular-svg-icons';
 import {IAngularMyDpOptions} from 'angular-mydatepicker';
-import {Filtro} from '../model/filtro';
+import {FiltroModel} from '../model/filtro.model';
 import {DatePipe} from '@angular/common';
 import {MapaService} from './mapa.service';
-import {FiltroDTO} from '../model/filtroDTO';
+import {FiltroCamposModel} from '../model/filtro-campos.model';
 
 @Component({
   selector: 'app-mapa',
@@ -19,18 +17,9 @@ export class MapaComponent implements OnInit, AfterViewInit {
   constructor(private readonly breakpointObserver: BreakpointObserver, private readonly datePipe: DatePipe,
               private readonly service: MapaService) {}
 
-  /*['#ffffb2','#fed976','#feb24c','#fd8d3c','#f03b20','#bd0026']*/
-  mapa: Map;
-  filtro: Filtro;
-  faDrawPolygon = faDrawPolygon;
-  faFilter = faFilter;
-  faEraser = faEraser;
-  faCalendarAlt = faCalendarAlt;
-  faEye = faEye;
-  faCircle = faCircle;
-  faBroadcastTower = faBroadcastTower;
-  visualizacoes;
-  bairros;
+  // FiltroModel
+  filtro: FiltroModel;
+  filtroCampos: FiltroCamposModel;
 
   dataOptions: IAngularMyDpOptions = {
     dateRange: false,
@@ -40,34 +29,23 @@ export class MapaComponent implements OnInit, AfterViewInit {
                   7: 'Julho', 8: 'Agosto', 9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'}
   };
 
-  // Lon Lat
-  estacaoAutomaticaRadioMarinha = '-38.495944, -12.808222';
-
-  // Long lat
-  estacaoAutomaticaOndina = '-38.505760, -13.005515';
-
-  // Lon Lat
-  estacaoConvencionalOndina = '-38.505825, -13.005768';
-
-  teste;
-
   // TODO desabilitar datas que não tem no banco
   /*disableSince*/
   /*disableUntil*/
 
   // Camadas do mapa
+  /*['#ffffb2','#fed976','#feb24c','#fd8d3c','#f03b20','#bd0026']*/
+  mapa: Map;
   mapaBairro;
+  mapaCirculo;
   mapaPontos = [];
 
   ngOnInit(): void {
-    // FIXME remover o valor de bairro, colocar null.
-    this.visualizacoes = ['Semanal'];
-    this.bairros = [{id: '1', nome: 'Centro Administrativo da Bahia'}];
-    this.filtro = new Filtro('Semanal', {id: '1', nome: 'Centro Administrativo da Bahia'}, null);
+    this.filtro = new FiltroModel();
+    this.filtroCampos = new FiltroCamposModel();
 
-    this.service.getFiltro().subscribe((data: FiltroDTO) => {
-      this.visualizacoes =  data.visualizacoes;
-      this.bairros = data.bairros;
+    this.service.getFiltro().subscribe((filtroCampos: FiltroCamposModel) => {
+      this.filtroCampos = filtroCampos;
       this.inicializarFiltro();
     }, error => {{
       console.log(error);
@@ -77,38 +55,6 @@ export class MapaComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.inicializarMapa();
   }
-
-  /*private validarTamanhoDaTela(): void {
-    this.breakpointObserver.observe([
-      Breakpoints.XSmall,
-      Breakpoints.Small,
-      Breakpoints.Medium,
-      Breakpoints.Large,
-      Breakpoints.XLarge
-    ]).subscribe(result => {
-      if (result.breakpoints[Breakpoints.XSmall]) {
-        console.log('XSmall');
-        // max-width = 599.99px
-      }
-      if (result.breakpoints[Breakpoints.Small]) {
-        console.log('Small');
-        // min-width = 600px and max-width = 959.99px
-      }
-      if (result.breakpoints[Breakpoints.Medium]) {
-        console.log('Medium');
-        // 960px and max-width = 1279.99px
-      }
-      if (result.breakpoints[Breakpoints.Large]) {
-        console.log('Large');
-        // 1280px and max-width = 1919.99px
-      }
-      if (result.breakpoints[Breakpoints.XLarge]) {
-        console.log('XLarge');
-        this.mapaHeight = '84%';
-        // 1920px
-      }
-    });
-  }*/
 
   private inicializarMapa(): void {
     this.mapa = new Map('map', {
@@ -124,19 +70,27 @@ export class MapaComponent implements OnInit, AfterViewInit {
     control.scale().addTo(this.mapa);
     tiles.addTo(this.mapa);
 
-
-    const fontAwesomeIcon = divIcon({
-      html: `<fa-icon [icon]="faBroadcastTower"></fa-icon>`,
-      iconSize: [20, 20],
-      className: 'myDivIcon'
+    const iconeEstacaoRadioMarinha = divIcon({
+      html: `<i class="fas fa-broadcast-tower fa-2x"></i>`,
+      className: 'mapa-icone mapa-icone-estacao-radio-marinha-cor'
     });
 
-    marker([-12.808222, -38.495944], {icon:  fontAwesomeIcon})
-    .addTo(this.mapa).bindPopup('A pretty CSS3 popup.<br> Easily customizable.');
+    const iconeEstacaoAutomatica = divIcon({
+      html: `<i class="fas fa-broadcast-tower fa-2x"></i>`,
+      className: 'mapa-icone'
+    });
 
-    marker([-12.808222, -38.495944]).addTo(this.mapa).bindPopup('Estação Automática Rádio Marinha.');
-    marker([-13.005515, -38.505760]).addTo(this.mapa).bindPopup('Estação Automática Ondina');
-    marker([-13.005768, -38.505825]).addTo(this.mapa).bindPopup('Estação Convencional Ondina');
+    const iconeEstacaoConvencional = divIcon({
+      html: `<i class="fas fa-broadcast-tower fa-2x"></i>`,
+      className: 'mapa-icone mapa-icone-estacao-convencional-cor'
+    });
+
+    marker([-12.808222, -38.495944], {icon:  iconeEstacaoRadioMarinha}).addTo(this.mapa)
+      .bindPopup('Estação Automática Rádio Marinha', { closeButton: false });
+    marker([-13.005515, -38.505760], {icon:  iconeEstacaoAutomatica}).addTo(this.mapa)
+      .bindPopup('Estação Automática Ondina', { closeButton: false });
+    marker([-13.005768, -38.505825], {icon:  iconeEstacaoConvencional}).addTo(this.mapa)
+      .bindPopup('Estação Convencional Ondina', { closeButton: false });
   }
 
   private limparLayersMapa(): void {
@@ -149,38 +103,68 @@ export class MapaComponent implements OnInit, AfterViewInit {
       this.mapaPontos.forEach(p => this.mapa.removeLayer(p));
       this.mapaPontos = [];
     }
+
+    if (this.mapaCirculo) {
+      this.mapa.removeLayer(this.mapaCirculo);
+      this.mapaCirculo = null;
+    }
   }
 
   private adicionarLayerBairroNoMapa(data: any): void {
     this.mapaBairro = geoJSON(data.bairro);
-    this.mapaBairro.addTo(this.mapa);
+    this.mapaBairro.addTo(this.mapa)
+      .bindTooltip(data.bairro.properties.nome, { permanent: true, direction: 'center', className: 'mapa-tooltip is-size-3' })
+      .openTooltip();
+    this.mapa.fitBounds(this.mapaBairro.getBounds());
   }
 
   private adicionarLayerPontosNoMapa(data: any): void {
-    const geojsonMarkerOptions = {
-      color: 'red',
-      fillColor: '#f03',
-      fillOpacity: 0.5,
-      radius: 1000
-    };
+    const iconeTemperatura = divIcon({
+      html: `<i class="fas fa-temperature-high fa-3x"></i>`,
+      className: 'mapa-icone-marker'
+    });
 
-    data.pontos.forEach(ponto => {
+    for (const ponto of data.pontos) {
       const layer = geoJSON(ponto, {
         pointToLayer(feature, latlng) {
-          const circle2 = circle(latlng, geojsonMarkerOptions);
-          /*circle.bindPopup(`
-          Temperatura dia: ${ponto.properties.temperaturadia}°C<br>
-          Hora dia: ${ponto.properties.horadia} da manhã<br>
-          Temperatura Noite: ${ponto.properties.temperaturanoite}°C<br>
-          Hora dia: ${ponto.properties.horanoite} da noite<br>
-          `);*/
-          return circle2;
+          const layerMarker = marker(latlng, {icon:  iconeTemperatura})
+            .bindPopup(
+              `
+            <div class="box">
+            <div class="has-text-centered is-size-5 has-text-weight-semibold">Manhã</div><br>
+              <div class="is-size-7">
+                  Temperatura: ${ponto.properties.temperaturadia ? ponto.properties.temperaturadia + '°C' : '--'}<br>
+                  Hora: ${ponto.properties.horadia ? ponto.properties.horadia + 'h' : '--'}
+                </div>
+            </div>
+            <div class="box">
+            <div class="has-text-centered is-size-5 has-text-weight-semibold">Noite</div><br>
+                <div class="is-size-7">
+                  Temperatura: ${ponto.properties.temperaturanoite ? ponto.properties.temperaturanoite + '°C' : '--'}<br>
+                  Hora: ${ponto.properties.horanoite ? ponto.properties.horanoite + 'h' : ''}
+                </div>
+            </div>
+          `, { closeButton: false });
+          return layerMarker;
         }
       });
 
-      layer.addTo(this.mapa);
+      layer.addTo(this.mapa).on('click', () => {
+        const circleLayer = circle([ponto.geometry.coordinates[1], ponto.geometry.coordinates[0]], {
+          color: 'red',
+          fillColor: '#f03',
+          fillOpacity: 0.5,
+          radius: 1000
+        });
+
+        if (!this.mapaCirculo) {
+          circleLayer.addTo(this.mapa);
+          this.mapaCirculo = circleLayer;
+        }
+      });
+
       this.mapaPontos.push(layer);
-    });
+    }
   }
 
   filtrar(): void {
@@ -193,6 +177,7 @@ export class MapaComponent implements OnInit, AfterViewInit {
     }, error => {
       console.log(error);
     });
+
     /*const legend = new Control({position: 'bottomright'});
     legend.onAdd = function(map) {
 
@@ -234,12 +219,12 @@ export class MapaComponent implements OnInit, AfterViewInit {
     return 'black';
   }*/
 
-  private inicializarFiltro(): void {
-    const date = new Date();
-    const visualizacao = this.visualizacoes ? this.visualizacoes[0] : null;
-    const bairro = this.bairros ? this.bairros[0] : null;
+  onChangeVisualizacao(): void {
+    this.filtro.intervalo = this.filtroCampos.intervalos ? this.filtroCampos.intervalos[0] : null;
 
-    this.filtro = new Filtro(visualizacao, bairro, {
+    const date = new Date();
+
+    this.filtro.data = {
       isRange: false,
       singleDate: {
         date: {
@@ -252,10 +237,18 @@ export class MapaComponent implements OnInit, AfterViewInit {
         epoc:  date.getTime()
       },
       dateRange: null
-    });
+    };
+  }
+
+  private inicializarFiltro(): void {
+    this.filtro = new FiltroModel();
+    this.filtro.bairro = this.filtroCampos.bairros ? this.filtroCampos.bairros[0] : null;
+    this.filtro.visualizacao = this.filtroCampos.visualizacoes ? this.filtroCampos.visualizacoes[0] : null;
+    this.onChangeVisualizacao();
   }
 
   limpar(): void {
+    this.inicializarFiltro();
     this.limparLayersMapa();
     this.scrollToView('filtro');
   }

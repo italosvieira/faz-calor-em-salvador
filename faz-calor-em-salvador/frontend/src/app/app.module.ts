@@ -1,9 +1,7 @@
-import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-
+import {BrowserModule} from '@angular/platform-browser';
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
-import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
 import {MapaComponent} from './mapa/mapa.component';
 import {EstatisticasComponent} from './estatisticas/estatisticas.component';
 import {SobreComponent} from './sobre/sobre.component';
@@ -23,7 +21,6 @@ import {MapaService} from './mapa/mapa.service';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FontAwesomeModule,
     FormsModule,
     AngularMyDatePickerModule,
     HttpClientModule

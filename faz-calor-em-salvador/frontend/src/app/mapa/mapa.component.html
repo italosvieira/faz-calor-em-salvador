@@ -3,56 +3,55 @@
     <div class="control has-icons-left">
       <label class="label">Visualização</label>
       <div class="select is-rounded">
-        <select [(ngModel)]="filtro.visualizacao">
-          <option *ngFor="let visualizacao of visualizacoes">{{ visualizacao }}</option>
+        <select [(ngModel)]="filtro.visualizacao" (change)="onChangeVisualizacao()">
+          <option *ngFor="let visualizacao of filtroCampos.visualizacoes">{{ visualizacao }}</option>
         </select>
-        <span class="icon"><fa-icon [icon]="faEye"></fa-icon></span>
+        <span class="icon"><i class="fas fa-eye"></i></span>
       </div>
     </div>
 
-    <div class="control has-icons-left" style="max-width: 100%;">
+    <div class="control has-icons-left max-width-100">
       <label class="label">Bairro</label>
       <div class="select is-rounded">
         <select [(ngModel)]="filtro.bairro">
-          <option *ngFor="let bairro of bairros" [ngValue]="bairro">{{ bairro.nome }}</option>
+          <option *ngFor="let bairro of filtroCampos.bairros" [ngValue]="bairro">{{ bairro.nome }}</option>
         </select>
-        <span class="icon"><fa-icon [icon]="faDrawPolygon"></fa-icon></span>
+        <span class="icon"><i class="fas fa-draw-polygon"></i></span>
       </div>
     </div>
 
-    <!--<div class="control has-icons-left">
+    <div *ngIf="filtro.visualizacao === 'Semanal'" class="control has-icons-left max-width-100">
       <label class="label">Intervalo</label>
       <div class="select is-rounded">
-        <select>
-          <option>Select dropdown</option>
-          <option>With options</option>
+        <select [(ngModel)]="filtro.intervalo">
+          <option *ngFor="let intervalo of filtroCampos.intervalos" [ngValue]="intervalo">{{ intervalo.inicio }} até {{ intervalo.fim }}</option>
         </select>
-        <span class="icon"><fa-icon [icon]="faCalendarAlt"></fa-icon></span>
+        <span class="icon"><i class="fas fa-calendar-alt"></i></span>
       </div>
-    </div>-->
+    </div>
 
-    <div class="control" style="width: 150px; margin-right: .75rem;">
+    <div *ngIf="filtro.visualizacao === 'Dia a dia'" class="control date-imput-width">
       <label class="label">Data</label>
-      <div class="control has-icons-right">
+      <div class="control has-icons-left">
         <input class="input is-rounded" type="text" [(ngModel)]="filtro.data"
                #dp="angular-mydatepicker" (click)="dp.toggleCalendar()"
                angular-mydatepicker [options]="dataOptions"/>
-        <span class="icon is-small is-right"><fa-icon [icon]="faCalendarAlt"></fa-icon></span>
+        <span class="icon is-small is-left"><i class="fas fa-calendar-alt"></i></span>
       </div>
     </div>
   </div>
 
   <div class="field is-grouped is-grouped-centered">
     <div class="control">
-      <button (click)="filtrar()" class="button is-link is-rounded">
-        <span class="icon"><fa-icon [icon]="faFilter"></fa-icon></span>
+      <button (click)="filtrar()" class="button is-hovered is-link is-rounded">
+        <span class="icon"><i class="fas fa-filter"></i></span>
         <span>Filtrar</span>
       </button>
     </div>
 
     <div class="control">
-      <button (click)="limpar()" class="button is-warning is-rounded">
-        <span class="icon"><fa-icon [icon]="faEraser"></fa-icon></span>
+      <button (click)="limpar()" class="button is-hovered is-warning is-rounded botao-limpar-cor">
+        <span class="icon"><i class="fas fa-eraser"></i></span>
         <span>Limpar</span>
       </button>
     </div>
@@ -68,88 +67,45 @@
 
       <div class="container legenda-item">
         <span class="icon">
-          <fa-icon [icon]="faCircle" [styles]="{'color': '#bd0026'}" size="2x"></fa-icon>
+          <i class="fas fa-temperature-high fa-2x" style="color: red"></i>
+        </span>
+        <span class="heading legenda-text">Marcador de temperatura</span>
+      </div>
+
+      <div class="container legenda-item">
+        <span class="icon">
+          <i class="far fa-circle fa-2x" style="color: #bd0026"></i>
         </span>
         <span class="heading legenda-text">Área de maior temperatura</span>
       </div>
 
       <div class="container legenda-item">
         <span class="icon">
-          <fa-icon [icon]="faCircle" [styles]="{'color': '#ffffb2'}" size="2x"></fa-icon>
+          <i class="far fa-circle fa-2x" style="color:#ffffb2"></i>
         </span>
         <span class="heading legenda-text" >Área de menor temperatura</span>
-        <!--<p class="heading">Área de menor temperatura</p>-->
       </div>
 
-      <!--<nav class="level">
-        <div class="level-item has-text-centered" style="border-bottom: 1px solid;">
-          <p class="title">Legenda</p>
-        </div>
-      </nav>
-      <nav class="level">
-        <div class="level-left some-responsive-thing">
-          <div class="level-item">
-            <span class="icon">
-                <fa-icon [icon]="faCircle" [styles]="{'color': '#bd0026'}" size="2x"></fa-icon>
-              </span>
-          </div>
-          <div class="level-item">
-            <p class="heading">Área de maior temperatura</p>
-          </div>
-        </div>
-      </nav>
+      <div class="container legenda-item">
+        <span class="icon">
+          <i class="fas fa-broadcast-tower fa-2x mapa-icone-estacao-radio-marinha-cor"></i>
+        </span>
+        <span class="heading legenda-text" >Estação Automática Rádio Marinha</span>
+      </div>
 
-      <nav class="level">
-        <div class="level-left some-responsive-thing">
-          <div class="level-item">
-            <span class="icon">
-                <fa-icon [icon]="faCircle" [styles]="{'color': '#ffffb2'}" size="2x"></fa-icon>
-              </span>
-          </div>
-          <div class="level-item">
-            <p class="heading">Área de menor temperatura</p>
-          </div>
-        </div>
-      </nav>
+      <div class="container legenda-item">
+        <span class="icon">
+          <i class="fas fa-broadcast-tower fa-2x"></i>
+        </span>
+        <span class="heading legenda-text" >Estação Automática Ondina</span>
+      </div>
 
-      <nav class="level">
-        <div class="level-left some-responsive-thing">
-          <div class="level-item">
-            <span class="icon">
-                <fa-icon [icon]="faBroadcastTower" [styles]="{'color': 'black'}" size="2x"></fa-icon>
-              </span>
-          </div>
-          <div class="level-item">
-            <p class="heading is-size-7-mobile">Estação automática rádio marinha</p>
-          </div>
-        </div>
-      </nav>
-
-      <nav class="level">
-        <div class="level-left some-responsive-thing">
-          <div class="level-item">
-            <span class="icon">
-                <fa-icon [icon]="faBroadcastTower" [styles]="{'color': 'black'}" size="2x"></fa-icon>
-              </span>
-          </div>
-          <div class="level-item">
-            <p class="heading">Estação automática ondina</p>
-          </div>
-        </div>
-      </nav>
-
-      <nav class="level">
-        <div class="level-left some-responsive-thing">
-          <div class="level-item">
-            <span class="icon">
-                <fa-icon [icon]="faBroadcastTower" [styles]="{'color': 'black'}" size="2x"></fa-icon>
-              </span>
-          </div>
-          <div class="level-item">
-            <p class="heading">Estação manual ondina</p>
-          </div>
-        </div>
-      </nav>-->
+      <div class="container legenda-item">
+        <span class="icon">
+          <i class="fas fa-broadcast-tower fa-2x mapa-icone-estacao-convencional-cor"></i>
+        </span>
+        <span class="heading legenda-text" >Estação Convencional Ondina</span>
+      </div>
     </div>
   </div>
 
