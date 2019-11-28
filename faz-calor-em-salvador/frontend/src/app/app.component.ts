@@ -127,7 +127,6 @@ export class AppComponent implements OnInit {
       if (aba === 1) {
         this.abaSelecionada = 1;
         await this.router.navigate(['']);
-        this.scrollToView('filtro');
         return;
       } else if (aba === 2) {
         this.abaSelecionada = 2;
@@ -142,14 +141,5 @@ export class AppComponent implements OnInit {
 
     this.abaSelecionada = 1;
     await this.router.navigate(['']);
-    this.scrollToView('filtro');
-  }
-
-  private scrollToView(id: string): void {
-    const element = document.getElementById(id);
-
-    if (element) {
-      element.scrollIntoView();
-    }
   }
 }

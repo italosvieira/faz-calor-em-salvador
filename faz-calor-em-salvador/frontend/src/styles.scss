@@ -27,7 +27,7 @@ body {
 }
 
 .mapa-icone-estacao-radio-marinha-cor {
-  color: #3273dc;
+  color: #04b8e2;
 }
 
 .mapa-icone-estacao-convencional-cor {
@@ -37,4 +37,12 @@ body {
 .mapa-icone-marker {
   margin-left: -10.5px !important;
   color: red;
+}
+
+.tamanho-do-mapa {
+  height: 600px;
+
+  @include mobile {
+    height: 400px;
+  }
 }

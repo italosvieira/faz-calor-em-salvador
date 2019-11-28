@@ -1,4 +1,4 @@
-import {circle, control, divIcon, geoJSON, Map, marker, tileLayer} from 'leaflet';
+import {circle, Control, control, divIcon, DomUtil, geoJSON, Map, marker, tileLayer} from 'leaflet';
 import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {IAngularMyDpOptions} from 'angular-mydatepicker';
@@ -39,6 +39,8 @@ export class MapaComponent implements OnInit, AfterViewInit {
   mapaBairro;
   mapaCirculo;
   mapaPontos = [];
+  cabecalhoTemperaturaCidade;
+  cabecalhoPaletaDeTemperatura;
 
   ngOnInit(): void {
     this.filtro = new FiltroModel();
@@ -60,6 +62,7 @@ export class MapaComponent implements OnInit, AfterViewInit {
     this.mapa = new Map('map', {
       center: [-12.8382471753411741, -38.38245391845703],
       zoom: 13,
+      attributionControl: false
     });
 
     const tiles = tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -86,11 +89,11 @@ export class MapaComponent implements OnInit, AfterViewInit {
     });
 
     marker([-12.808222, -38.495944], {icon:  iconeEstacaoRadioMarinha}).addTo(this.mapa)
-      .bindPopup('Estação Automática Rádio Marinha', { closeButton: false });
+      .bindPopup('Estação Automática Rádio Marinha');
     marker([-13.005515, -38.505760], {icon:  iconeEstacaoAutomatica}).addTo(this.mapa)
-      .bindPopup('Estação Automática Ondina', { closeButton: false });
+      .bindPopup('Estação Automática Ondina');
     marker([-13.005768, -38.505825], {icon:  iconeEstacaoConvencional}).addTo(this.mapa)
-      .bindPopup('Estação Convencional Ondina', { closeButton: false });
+      .bindPopup('Estação Convencional Ondina');
   }
 
   private limparLayersMapa(): void {
@@ -108,6 +111,16 @@ export class MapaComponent implements OnInit, AfterViewInit {
       this.mapa.removeLayer(this.mapaCirculo);
       this.mapaCirculo = null;
     }
+
+    if (this.cabecalhoTemperaturaCidade) {
+      this.mapa.removeControl(this.cabecalhoTemperaturaCidade);
+      this.cabecalhoTemperaturaCidade = null;
+    }
+
+    if (this.cabecalhoPaletaDeTemperatura) {
+      this.mapa.removeControl(this.cabecalhoPaletaDeTemperatura);
+      this.cabecalhoPaletaDeTemperatura = null;
+    }
   }
 
   private adicionarLayerBairroNoMapa(data: any): void {
@@ -115,7 +128,7 @@ export class MapaComponent implements OnInit, AfterViewInit {
     this.mapaBairro.addTo(this.mapa)
       .bindTooltip(data.bairro.properties.nome, { permanent: true, direction: 'center', className: 'mapa-tooltip is-size-3' })
       .openTooltip();
-    this.mapa.fitBounds(this.mapaBairro.getBounds());
+    this.mapa.flyToBounds(this.mapaBairro.getBounds());
   }
 
   private adicionarLayerPontosNoMapa(data: any): void {
@@ -127,9 +140,12 @@ export class MapaComponent implements OnInit, AfterViewInit {
     for (const ponto of data.pontos) {
       const layer = geoJSON(ponto, {
         pointToLayer(feature, latlng) {
-          const layerMarker = marker(latlng, {icon:  iconeTemperatura})
-            .bindPopup(
-              `
+          return marker(latlng, {icon:  iconeTemperatura});
+        }
+      });
+
+      layer.bindPopup(
+        `
             <div class="box">
             <div class="has-text-centered is-size-5 has-text-weight-semibold">Manhã</div><br>
               <div class="is-size-7">
@@ -141,13 +157,10 @@ export class MapaComponent implements OnInit, AfterViewInit {
             <div class="has-text-centered is-size-5 has-text-weight-semibold">Noite</div><br>
                 <div class="is-size-7">
                   Temperatura: ${ponto.properties.temperaturanoite ? ponto.properties.temperaturanoite + '°C' : '--'}<br>
-                  Hora: ${ponto.properties.horanoite ? ponto.properties.horanoite + 'h' : ''}
+                  Hora: ${ponto.properties.horanoite ? ponto.properties.horanoite + 'h' : '--'}
                 </div>
             </div>
-          `, { closeButton: false });
-          return layerMarker;
-        }
-      });
+          `);
 
       layer.on('click', () => {
         const circleLayer = circle([ponto.geometry.coordinates[1], ponto.geometry.coordinates[0]], {
@@ -157,7 +170,8 @@ export class MapaComponent implements OnInit, AfterViewInit {
           radius: 1000
         });
 
-        if (!this.mapaCirculo) {
+
+        if (!this.mapaCirculo && layer.isPopupOpen()) {
           circleLayer.addTo(this.mapa);
           this.mapaCirculo = circleLayer;
         }
@@ -175,36 +189,58 @@ export class MapaComponent implements OnInit, AfterViewInit {
     }
   }
 
+  onClickIconeEstacao(estacao: number) {
+    if (estacao === 1) {
+      this.mapa.flyTo({ lat: -12.808222, lng: -38.495944}, 16);
+    } else if (estacao === 2) {
+      this.mapa.flyTo({ lat: -13.005515, lng: -38.505760}, 16);
+    } else if (estacao === 3) {
+      this.mapa.flyTo({ lat: -13.005768, lng: -38.505825}, 16);
+    } else if (estacao === 4) {
+      if (this.mapaBairro) {
+        this.mapa.flyToBounds(this.mapaBairro.getBounds());
+      }
+    }
+  }
+
   filtrar(): void {
     this.scrollToView('map');
 
     this.service.postFiltro(this.filtro).subscribe((data: any) => {
       this.limparLayersMapa();
+      this.adicionarLayerCabecalhoTopo(data);
       this.adicionarLayerBairroNoMapa(data);
       this.adicionarLayerPontosNoMapa(data);
     }, error => {
       console.log(error);
     });
+  }
 
-    /*const legend = new Control({position: 'bottomright'});
-    legend.onAdd = function(map) {
+  adicionarLayerCabecalhoTopo(data: any): void {
+    console.log(data);
+    this.cabecalhoTemperaturaCidade = new Control({position: 'topright'});
+    this.cabecalhoTemperaturaCidade.onAdd = () =>  {
+      const div = DomUtil.create('div', '');
 
-      // tslint:disable-next-line:one-variable-per-declaration
-      const div = DomUtil.create('div', 'info-batata legend-batata'),
-        grades = [0, 10, 20, 50, 100, 200, 500, 1000],
-        labels = [];
+      div.innerHTML = `
+        <div class="box">
+        <div class="box">
 
-      // loop through our density intervals and generate a label with a colored square for each interval
-      for (let i = 0; i < grades.length; i++) {
-        div.innerHTML +=
-          '<i style="background: red'  + '"></i> ' +
-          grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
-      }
+        </div>
+        <div class="box">
+
+        </div>
+        <div class="box">
+
+        </div>
+
+        </div>
+      `;
 
       return div;
     };
 
-    legend.addTo(this.mapa);*/
+    this.cabecalhoTemperaturaCidade.addTo(this.mapa);
   }
 
   /*metodoAdd(): HTMLElement {
@@ -226,6 +262,17 @@ export class MapaComponent implements OnInit, AfterViewInit {
   /*getColor(i) {
     return 'black';
   }*/
+
+  getColor(d) {
+    return d > 1000 ? '#800026' :
+      d > 500  ? '#BD0026' :
+        d > 200  ? '#E31A1C' :
+          d > 100  ? '#FC4E2A' :
+            d > 50   ? '#FD8D3C' :
+              d > 20   ? '#FEB24C' :
+                d > 10   ? '#FED976' :
+                  '#FFEDA0';
+  }
 
   onChangeVisualizacao(): void {
     this.filtro.intervalo = this.filtroCampos.intervalos ? this.filtroCampos.intervalos[0] : null;
