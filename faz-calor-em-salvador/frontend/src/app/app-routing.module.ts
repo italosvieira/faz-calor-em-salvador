@@ -6,8 +6,8 @@ import { SobreComponent } from './sobre/sobre.component';
 
 const routes: Routes = [
   { path: '', component: MapaComponent },
-  { path: 'estatisticas', component: EstatisticasComponent, pathMatch: 'full' },
-  { path: 'sobre', component: SobreComponent, pathMatch: 'full' },
+  /*{ path: 'estatisticas', component: EstatisticasComponent, pathMatch: 'full' },
+  { path: 'sobre', component: SobreComponent, pathMatch: 'full' },*/
   { path: '**', redirectTo: '' }
 ];
 

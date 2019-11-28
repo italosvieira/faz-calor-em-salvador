@@ -74,7 +74,19 @@ export class MapaComponent implements OnInit, AfterViewInit {
     tiles.addTo(this.mapa);
 
     const iconeEstacaoRadioMarinha = divIcon({
-      html: `<i class="fas fa-broadcast-tower fa-2x"></i>`,
+      html: `
+            <span class="icon">
+              <div>
+              <div>
+                <span style="color: black;">32.89°C</span><i class="fas fa-sun fa-2x" style="display: inline; color: #f9d71c;"></i>
+                </div>
+                <div>
+                <span style="color: black;">32.89°C</span><i class="fas fa-moon fa-2x" style="display: inline; color: #adc6ff;"></i>
+                </div>
+              </div>
+              <i class="fas fa-temperature-high fa-4x" style="color: red;"></i>
+            </span>
+        `,
       className: 'mapa-icone mapa-icone-estacao-radio-marinha-cor'
     });
 

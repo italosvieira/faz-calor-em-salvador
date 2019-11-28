@@ -24,8 +24,8 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.banner = 'banner2.jpg';
-
-    this.router.events.subscribe((event) => {
+    this.abaSelecionada = 1;
+    /*this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         if (event.url === '/') {
           this.abaSelecionada = 1;
@@ -37,8 +37,9 @@ export class AppComponent implements OnInit {
       }});
 
     if (!this.abaSelecionada) {
+      console.log('aqui');
       this.abaSelecionada = 1;
-    }
+    }*/
 
     this.breakpointObserver.observe([
       Breakpoints.XSmall,
