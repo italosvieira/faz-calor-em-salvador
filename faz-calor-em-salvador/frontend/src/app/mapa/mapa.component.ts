@@ -1,4 +1,4 @@
-import {circle, Control, control, divIcon, DomUtil, geoJSON, Map, marker, tileLayer} from 'leaflet';
+import {Circle, circle, Control, control, divIcon, DomUtil, geoJSON, Map, marker, tileLayer} from 'leaflet';
 import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {IAngularMyDpOptions} from 'angular-mydatepicker';
@@ -37,7 +37,7 @@ export class MapaComponent implements OnInit, AfterViewInit {
   /*['#ffffb2','#fed976','#feb24c','#fd8d3c','#f03b20','#bd0026']*/
   mapa: Map;
   mapaBairro;
-  mapaCirculo;
+  mapaCirculo: Circle;
   mapaPontos = [];
   cabecalhoTemperaturaCidade;
   cabecalhoPaletaDeTemperatura;
@@ -62,7 +62,8 @@ export class MapaComponent implements OnInit, AfterViewInit {
     this.mapa = new Map('map', {
       center: [-12.8382471753411741, -38.38245391845703],
       zoom: 13,
-      attributionControl: false
+      attributionControl: false,
+      zoomControl: false
     });
 
     const tiles = tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -74,19 +75,7 @@ export class MapaComponent implements OnInit, AfterViewInit {
     tiles.addTo(this.mapa);
 
     const iconeEstacaoRadioMarinha = divIcon({
-      html: `
-            <span class="icon">
-              <div>
-              <div>
-                <span style="color: black;">32.89°C</span><i class="fas fa-sun fa-2x" style="display: inline; color: #f9d71c;"></i>
-                </div>
-                <div>
-                <span style="color: black;">32.89°C</span><i class="fas fa-moon fa-2x" style="display: inline; color: #adc6ff;"></i>
-                </div>
-              </div>
-              <i class="fas fa-temperature-high fa-4x" style="color: red;"></i>
-            </span>
-        `,
+      html: `<i class="fas fa-broadcast-tower fa-2x"></i>`,
       className: 'mapa-icone mapa-icone-estacao-radio-marinha-cor'
     });
 
@@ -144,19 +133,40 @@ export class MapaComponent implements OnInit, AfterViewInit {
   }
 
   private adicionarLayerPontosNoMapa(data: any): void {
-    const iconeTemperatura = divIcon({
-      html: `<i class="fas fa-temperature-high fa-3x"></i>`,
+    /*const iconeTemperatura = divIcon({
+      html: `
+        <span class="icon">
+            <div>
+              <span style="color: black; font-weight: bold; font-size: 16px;">32.89°C</span><i class="fas fa-sun fa-2x" style="display: inline; color: #f9d71c;"></i>
+              <span style="color: black; font-weight: bold; font-size: 16px;">32.89°C</span><i class="fas fa-moon fa-2x" style="display: inline; color: #adc6ff;"></i>
+            </div>
+          <i class="fas fa-temperature-high fa-4x" style="color: red;"></i>
+        </span>
+      `,
       className: 'mapa-icone-marker'
-    });
+    });*/
 
     for (const ponto of data.pontos) {
+      const iconeTemperatura = divIcon({
+        html: `
+        <span class="icon">
+            <div>
+              <span style="color: black; font-weight: bold; font-size: 16px;">${ponto.properties.temperaturadia ? ponto.properties.temperaturadia + '°C' : '--'}</span><i class="fas fa-sun fa-2x" style="display: inline; color: #f9d71c;"></i>
+              <span style="color: black; font-weight: bold; font-size: 16px;">${ponto.properties.temperaturanoite ? ponto.properties.temperaturanoite + '°C' : '--'}</span><i class="fas fa-moon fa-2x" style="display: inline; color: #adc6ff;"></i>
+            </div>
+          <i class="fas fa-temperature-high fa-4x" style="color: red;"></i>
+        </span>
+      `,
+        className: 'mapa-icone-marker'
+      });
+
       const layer = geoJSON(ponto, {
         pointToLayer(feature, latlng) {
           return marker(latlng, {icon:  iconeTemperatura});
         }
       });
 
-      layer.bindPopup(
+      /*layer.bindPopup(
         `
             <div class="box">
             <div class="has-text-centered is-size-5 has-text-weight-semibold">Manhã</div><br>
@@ -172,7 +182,7 @@ export class MapaComponent implements OnInit, AfterViewInit {
                   Hora: ${ponto.properties.horanoite ? ponto.properties.horanoite + 'h' : '--'}
                 </div>
             </div>
-          `);
+          `);*/
 
       layer.on('click', () => {
         const circleLayer = circle([ponto.geometry.coordinates[1], ponto.geometry.coordinates[0]], {
@@ -181,20 +191,30 @@ export class MapaComponent implements OnInit, AfterViewInit {
           fillOpacity: 0.5,
           radius: 1000
         });
+        console.log('Aqui');
 
+        if (this.mapaCirculo) {
+          this.mapa.removeLayer(this.mapaCirculo);
 
-        if (!this.mapaCirculo && layer.isPopupOpen()) {
-          circleLayer.addTo(this.mapa);
+          if (this.mapaCirculo.getLatLng().lat === circleLayer.getLatLng().lat &&
+              this.mapaCirculo.getLatLng().lng === circleLayer.getLatLng().lng) {
+            this.mapaCirculo = null;
+          } else {
+            this.mapaCirculo = circleLayer;
+            this.mapaCirculo.addTo(this.mapa);
+          }
+        } else {
           this.mapaCirculo = circleLayer;
+          this.mapaCirculo.addTo(this.mapa);
         }
       });
 
-      layer.getPopup().on('remove', () => {
+      /*layer.getPopup().on('remove', () => {
         if (this.mapaCirculo) {
           this.mapa.removeLayer(this.mapaCirculo);
           this.mapaCirculo = null;
         }
-      });
+      });*/
 
       layer.addTo(this.mapa);
       this.mapaPontos.push(layer);
@@ -228,24 +248,53 @@ export class MapaComponent implements OnInit, AfterViewInit {
     });
   }
 
+  obterTemperaturaTruncada(temperatura) {
+    return temperatura && !isNaN(temperatura) ? parseFloat(temperatura).toFixed(2) : '--';
+  }
+
   adicionarLayerCabecalhoTopo(data: any): void {
     console.log(data);
     this.cabecalhoTemperaturaCidade = new Control({position: 'topright'});
     this.cabecalhoTemperaturaCidade.onAdd = () =>  {
       const div = DomUtil.create('div', '');
 
+      const estacaoAutomaticaTempInst = this.obterTemperaturaTruncada(data.estacaoAutomatica.mediaTemperaturaManha.temperaturainst);
+      const estacaoAutomaticaTempMax = this.obterTemperaturaTruncada(data.estacaoAutomatica.mediaTemperaturaManha.temperaturamax);
+      const estacaoAutomaticaTempMin = this.obterTemperaturaTruncada(data.estacaoAutomatica.mediaTemperaturaManha.temperaturamin);
+
+      const estacaoAutomaticaRadioMarinhaTempInst = this.obterTemperaturaTruncada(data.estacaoAutomaticaRadioMarinha.mediaTemperaturaManha.temperaturainst);
+      const estacaoAutomaticaRadioMarinhaTempMax = this.obterTemperaturaTruncada(data.estacaoAutomaticaRadioMarinha.mediaTemperaturaManha.temperaturamax);
+      const estacaoAutomaticaRadioMarinhaTempMin = this.obterTemperaturaTruncada(data.estacaoAutomaticaRadioMarinha.mediaTemperaturaManha.temperaturamin);
+
+      const estacaoConvencionalTempInst = this.obterTemperaturaTruncada(data.estacaoConvencional.mediaTemperaturaManha.temperaturamin);
+      const estacaoConvencionalTempMax = this.obterTemperaturaTruncada(data.estacaoConvencional.mediaTemperaturaManha.temperaturamax);
+      const estacaoConvencionalTempMin = this.obterTemperaturaTruncada(data.estacaoConvencional.mediaTemperaturaManha.temperaturamin);
+
       div.innerHTML = `
         <div class="box">
-        <div class="box">
+          <div>
+            <p class="has-text-centered" style="border-bottom: 1px solid; font-size: 16px; font-weight: bold;">Temperatura do dia (°C)</p>
+          </div>
 
-        </div>
-        <div class="box">
+          <div style="display: flex">
+          <div style="border-right: 1px solid; padding-right: 2px;">
+          <p><i class="fas fa-broadcast-tower fa-xs mapa-icone-estacao-radio-marinha-cor" style="margin-right: 2px;"></i>Inst: ${estacaoAutomaticaTempInst}</p>
+          <p><i class="fas fa-broadcast-tower fa-xs mapa-icone-estacao-radio-marinha-cor" style="margin-right: 2px;"></i>Máx: ${estacaoAutomaticaTempMax}</p>
+          <p><i class="fas fa-broadcast-tower fa-xs mapa-icone-estacao-radio-marinha-cor" style="margin-right: 2px;"></i>Mín: ${estacaoAutomaticaTempMin}</p>
+          </div>
 
-        </div>
-        <div class="box">
+          <div style="border-right: 1px solid; padding-right: 2px; padding-left: 2px;">
+            <p><i class="fas fa-broadcast-tower fa-xs" style="margin-right: 2px;"></i>Inst: ${estacaoAutomaticaRadioMarinhaTempInst}</p>
+            <p><i class="fas fa-broadcast-tower fa-xs" style="margin-right: 2px;"></i>Máx: ${estacaoAutomaticaRadioMarinhaTempMax}</p>
+            <p><i class="fas fa-broadcast-tower fa-xs" style="margin-right: 2px;"></i>Mín: ${estacaoAutomaticaRadioMarinhaTempMin}</p>
+          </div>
 
-        </div>
-
+          <div style="padding-left: 2px;">
+            <p><i class="fas fa-broadcast-tower fa-xs mapa-icone-estacao-convencional-cor" style="margin-right: 2px;"></i>Inst: ${estacaoConvencionalTempInst}</p>
+            <p><i class="fas fa-broadcast-tower fa-xs mapa-icone-estacao-convencional-cor" style="margin-right: 2px;"></i>Máx: ${estacaoConvencionalTempMax}</p>
+            <p><i class="fas fa-broadcast-tower fa-xs mapa-icone-estacao-convencional-cor" style="margin-right: 2px;"></i>Mín: ${estacaoConvencionalTempMin}</p>
+          </div>
+          </div>
         </div>
       `;
 
