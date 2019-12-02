@@ -13,7 +13,7 @@ module.exports = function () {
         ctx.body = createResponse(ctx.originalUrl, ctx.method, error.httpStatusCode, error.clientMessage)
       } else {
         ctx.status = 500
-        ctx.body = createResponse(ctx.originalUrl, ctx.method, 500, 'A unexpected error has occurred.')
+        ctx.body = createResponse(ctx.originalUrl, ctx.method, 500, 'Um erro inesperado aconteceu.')
       }
     }
   }

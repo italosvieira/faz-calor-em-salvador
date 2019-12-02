@@ -1,15 +1,12 @@
-const { Pool } = require('pg')
-const GeoJSON = require('geojson')
 const moment = require('moment')
-const BusinessException = require('../exceptions/business-exception')
+const lstdService = require('./lstd-service')
 const bairroService = require('./bairro-service')
 const metadadoService = require('./metadado-service')
-const lstdService = require('./lstd-service')
 const estacaoAutomaticaService = require('./estacao-automatica-service')
-const estacaoAutomaticaRadioMarinhaService = require('./estacao-automatica-radio-marinha-service')
 const estacaoConvencionalService = require('./estacao-convencional-service')
+const estacaoAutomaticaRadioMarinhaService = require('./estacao-automatica-radio-marinha-service')
 
-const pool = new Pool()
+const BusinessException = require('../exceptions/business-exception')
 
 function validarRequest (body) {
   if (!body) {
@@ -95,16 +92,35 @@ async function consultarMapaModoIntervalo (body) {
   }
 }
 
-function consultarMapaModoDiaDia (ctx) {
+async function consultarMapaModoDiaDia (body) {
+  const dia = body.data.singleDate.formatted
 
+  return {
+    bairro: await bairroService.getBairroAsGeoJson(body.bairro.id),
+    pontos: await lstdService.getPontosDiaAsGeoJson(body.bairro.id, dia),
+    estacaoAutomatica: {
+      mediaTemperaturaManha: await estacaoAutomaticaService.getTemperaturaDia(dia, 10),
+      mediaTemperaturaNoite: await estacaoAutomaticaService.getTemperaturaDia(dia, 22)
+    },
+    estacaoAutomaticaRadioMarinha: {
+      mediaTemperaturaManha: await estacaoAutomaticaRadioMarinhaService.getTemperaturaDia(dia, 10),
+      mediaTemperaturaNoite: await estacaoAutomaticaRadioMarinhaService.getTemperaturaDia(dia, 22)
+    },
+    estacaoConvencional: {
+      mediaTemperaturaManha: await estacaoConvencionalService.getTemperaturaDia(dia)
+    }
+  }
 }
 
 module.exports = {
   get: async function (ctx) {
+    const bairros = await bairroService.findAll()
+    const dias = await metadadoService.getIntervalos(bairros[0].id)
+
     ctx.body = {
-      visualizacoes: ['Semanal', 'Dia a dia'],
-      bairros: await bairroService.findAll(),
-      intervalos: await metadadoService.getIntervalos()
+      visualizacoes: ['Dia a dia', 'Semanal'],
+      bairros: bairros,
+      dias: dias
     }
   },
   post: async function (ctx) {
@@ -117,5 +133,11 @@ module.exports = {
     } else {
       ctx.body = await consultarMapaModoDiaDia(body)
     }
+  },
+  getDias: async function (bairroId) {
+    return metadadoService.getDiasDisponiveis(bairroId)
+  },
+  getIntervalos: async function (bairroId) {
+    return metadadoService.getIntervalos(bairroId)
   }
 }
