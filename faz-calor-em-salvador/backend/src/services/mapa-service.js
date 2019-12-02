@@ -112,10 +112,15 @@ async function consultarMapaModoDiaDia (body) {
   }
 }
 
+function transformarEmIMyDate (data) {
+  const d = data.split('-')
+  return { year: d[2], month: d[1], day: d[0] }
+}
+
 module.exports = {
   get: async function (ctx) {
     const bairros = await bairroService.findAll()
-    const dias = await metadadoService.getIntervalos(bairros[0].id)
+    const dias = await this.getDias(bairros[0].id)
 
     ctx.body = {
       visualizacoes: ['Dia a dia', 'Semanal'],
@@ -135,7 +140,7 @@ module.exports = {
     }
   },
   getDias: async function (bairroId) {
-    return metadadoService.getDiasDisponiveis(bairroId)
+    return (await metadadoService.getDiasDisponiveis(bairroId)).map(transformarEmIMyDate)
   },
   getIntervalos: async function (bairroId) {
     return metadadoService.getIntervalos(bairroId)
