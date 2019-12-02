@@ -1,11 +1,12 @@
 import {Circle, circle, Control, control, divIcon, DomUtil, geoJSON, Map, marker, tileLayer} from 'leaflet';
 import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {BreakpointObserver} from '@angular/cdk/layout';
-import {IAngularMyDpOptions} from 'angular-mydatepicker';
+import {IAngularMyDpOptions, IMyDate} from 'angular-mydatepicker';
 import {FiltroModel} from '../model/filtro.model';
 import {DatePipe} from '@angular/common';
 import {MapaService} from './mapa.service';
 import {FiltroCamposModel} from '../model/filtro-campos.model';
+import {IntervaloModel} from '../model/intervalo.model';
 
 @Component({
   selector: 'app-mapa',
@@ -17,7 +18,6 @@ export class MapaComponent implements OnInit, AfterViewInit {
   constructor(private readonly breakpointObserver: BreakpointObserver, private readonly datePipe: DatePipe,
               private readonly service: MapaService) {}
 
-  // FiltroModel
   filtro: FiltroModel;
   filtroCampos: FiltroCamposModel;
 
@@ -335,12 +335,10 @@ export class MapaComponent implements OnInit, AfterViewInit {
                   '#FFEDA0';
   }
 
-  onChangeVisualizacao(): void {
-    this.filtro.intervalo = this.filtroCampos.intervalos ? this.filtroCampos.intervalos[0] : null;
+  private montarDateModel(myDate: IMyDate) {
+    const date = myDate ? new Date(myDate.year + '-' + myDate.month + '-' + myDate.day) : new Date();
 
-    const date = new Date();
-
-    this.filtro.data = {
+    return {
       isRange: false,
       singleDate: {
         date: {
@@ -356,11 +354,36 @@ export class MapaComponent implements OnInit, AfterViewInit {
     };
   }
 
+  onChangeVisualizacao(): void {
+    this.filtroCampos.dias = null;
+    this.filtroCampos.intervalos = null;
+
+    if (this.filtro.visualizacao && this.filtro.visualizacao === 'Dia a dia') {
+      this.service.getDiasDisponiveis(this.filtro.bairro.id).subscribe((dias: Array<IMyDate>) => {
+        this.filtroCampos.dias = dias;
+        this.filtro.data = this.montarDateModel(dias[0]);
+      });
+    } else {
+      this.service.getIntervalos(this.filtro.bairro.id).subscribe((intervalos: Array<IntervaloModel>) => {
+        this.filtroCampos.intervalos = intervalos;
+        this.filtro.intervalo = intervalos ? intervalos[0] : null;
+      });
+    }
+  }
+
   private inicializarFiltro(): void {
     this.filtro = new FiltroModel();
+    this.filtro.data = this.montarDateModel(this.filtroCampos.dias ? this.filtroCampos.dias[0] : null);
     this.filtro.bairro = this.filtroCampos.bairros ? this.filtroCampos.bairros[0] : null;
     this.filtro.visualizacao = this.filtroCampos.visualizacoes ? this.filtroCampos.visualizacoes[0] : null;
-    this.onChangeVisualizacao();
+    this.dataOptions = {
+      dateRange: false,
+      dateFormat: 'dd/mm/yyyy',
+      dayLabels: {su: 'Dom', mo: 'Seg', tu: 'Ter', we: 'Qua', th: 'Qui', fr: 'Sex', sa: 'Sáb'},
+      monthLabels: {1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril', 5: 'Maio', 6: 'Junho',
+        7: 'Julho', 8: 'Agosto', 9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'},
+      enableDates: this.filtroCampos.dias
+    };
   }
 
   limpar(): void {
