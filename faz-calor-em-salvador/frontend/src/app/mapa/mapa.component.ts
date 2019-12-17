@@ -365,6 +365,7 @@ export class MapaComponent implements OnInit, AfterViewInit {
       });
     } else {
       this.service.getIntervalos(this.filtro.bairro.id).subscribe((intervalos: Array<IntervaloModel>) => {
+        console.log(intervalos);
         this.filtroCampos.intervalos = intervalos;
         this.filtro.intervalo = intervalos ? intervalos[0] : null;
       });

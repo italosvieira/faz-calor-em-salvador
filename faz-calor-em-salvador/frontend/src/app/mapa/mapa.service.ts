@@ -9,19 +9,21 @@ import {environment} from '../../environments/environment';
 export class MapaService {
   constructor(private http: HttpClient) {}
 
+  route = environment.apiUrlPublic + 'filtro';
+
   getFiltro() {
-    return this.http.get(environment.apiUrlPublic + 'filtro');
+    return this.http.get(this.route);
   }
 
   postFiltro(filtro: FiltroModel) {
-    return this.http.post(environment.apiUrlPublic + 'filtro', filtro);
+    return this.http.post(this.route, filtro);
   }
 
   getIntervalos(bairroId) {
-    return this.http.get(environment.apiUrlPublic + 'intervalos', {params: bairroId});
+    return this.http.get(this.route + `/${bairroId}/intervalos`);
   }
 
   getDiasDisponiveis(bairroId) {
-    return this.http.get(environment.apiUrlPublic + 'dias', {params: bairroId});
+    return this.http.get(this.route + `/${bairroId}/dias`);
   }
 }

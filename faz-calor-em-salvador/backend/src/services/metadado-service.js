@@ -7,13 +7,13 @@ module.exports = {
     return (await pool.query({
       text:
           `select distinct to_char(md.data_inicio_colecao, 'DD/MM/YYYY') as inicio,
-                  to_char(md.data_fim_colecao, 'DD/MM/YYYY') as fim
+                           to_char(md.data_fim_colecao, 'DD/MM/YYYY') as fim
         from lstd_metadados md
         inner join lstd_dados_cientificos dc on md.id = dc.id_metadados
         where md.data_inicio_colecao is not null
-        and where md.data_fim_colecao is not null
+        and md.data_fim_colecao is not null
         and dc.id_bairro = $1
-        order by md.data_fim_colecao desc
+        order by fim desc
       `,
       values: [bairroId]
     })).rows
