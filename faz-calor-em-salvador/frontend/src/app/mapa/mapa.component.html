@@ -2,8 +2,8 @@
   <div class="field is-grouped is-grouped-multiline is-grouped-centered">
     <div class="control has-icons-left">
       <label class="label">Visualização</label>
-      <div class="select is-rounded">
-        <select [(ngModel)]="filtro.visualizacao" (change)="onChangeVisualizacao()">
+      <div class="select is-rounded" [ngClass]="isLoadingPage === true ? 'is-loading' : '' ">
+        <select [(ngModel)]="filtro.visualizacao" (change)="onChangeVisualizacao()" [disabled]="isDisabledFiltros">
           <option *ngFor="let visualizacao of filtroCampos.visualizacoes">{{ visualizacao }}</option>
         </select>
         <span class="icon"><i class="fas fa-eye"></i></span>
@@ -12,8 +12,8 @@
 
     <div class="control has-icons-left max-width-100">
       <label class="label">Bairro</label>
-      <div class="select is-rounded">
-        <select [(ngModel)]="filtro.bairro">
+      <div class="select is-rounded" [ngClass]="isLoadingPage === true ? 'is-loading' : '' ">
+        <select [(ngModel)]="filtro.bairro" (change)="onChangeVisualizacao()" [disabled]="isDisabledFiltros">
           <option *ngFor="let bairro of filtroCampos.bairros" [ngValue]="bairro">{{ bairro.nome }}</option>
         </select>
         <span class="icon"><i class="fas fa-draw-polygon"></i></span>
@@ -22,20 +22,20 @@
 
     <div *ngIf="filtro.visualizacao === 'Semanal'" class="control has-icons-left max-width-100">
       <label class="label">Intervalo</label>
-      <div class="select is-rounded">
-        <select [(ngModel)]="filtro.intervalo">
+      <div class="select is-rounded" [ngClass]="isLoadingPage || isLoadingIntervalo === true ? 'is-loading' : '' ">
+        <select [(ngModel)]="filtro.intervalo" [disabled]="isDisabledFiltros || isLoadingIntervalo">
           <option *ngFor="let intervalo of filtroCampos.intervalos" [ngValue]="intervalo">{{ intervalo.inicio }} até {{ intervalo.fim }}</option>
         </select>
         <span class="icon"><i class="fas fa-calendar-alt"></i></span>
       </div>
     </div>
 
-    <div *ngIf="filtro.visualizacao === 'Dia a dia'" class="control date-imput-width">
+    <div *ngIf="filtro.visualizacao !== 'Semanal'" class="control date-imput-width">
       <label class="label">Data</label>
-      <div class="control has-icons-left">
+      <div class="control has-icons-left" [ngClass]="isLoadingPage || isLoadingIntervalo === true ? 'is-loading' : '' ">
         <input class="input is-rounded" type="text" [(ngModel)]="filtro.data"
                #dp="angular-mydatepicker" (click)="dp.toggleCalendar()"
-               angular-mydatepicker [options]="dataOptions"/>
+               angular-mydatepicker [options]="dataOptions" [disabled]="isDisabledFiltros || isLoadingIntervalo"/>
         <span class="icon is-small is-left"><i class="fas fa-calendar-alt"></i></span>
       </div>
     </div>
@@ -43,14 +43,16 @@
 
   <div class="field is-grouped is-grouped-centered">
     <div class="control">
-      <button (click)="filtrar()" class="button is-hovered is-link is-rounded">
+      <button (click)="filtrar()" class="button is-hovered is-link is-rounded"
+              [ngClass]="isLoadingButtons === true ? 'is-loading' : '' " [disabled]="isDisabledButtons">
         <span class="icon"><i class="fas fa-filter"></i></span>
         <span>Filtrar</span>
       </button>
     </div>
 
     <div class="control">
-      <button (click)="limpar()" class="button is-hovered is-warning is-rounded botao-limpar-cor">
+      <button (click)="limpar()" class="button is-hovered is-warning is-rounded"
+              [ngClass]="isLoadingButtons === true ? 'is-loading' : 'botao-limpar-cor' " [disabled]="isDisabledButtons">
         <span class="icon"><i class="fas fa-eraser"></i></span>
         <span>Limpar</span>
       </button>
@@ -71,20 +73,6 @@
         </span>
         <span class="heading legenda-text">Marcador de temperatura</span>
       </div>
-
-      <!--<div class="container legenda-item">
-        <span class="icon">
-          <i class="far fa-circle fa-2x" style="color: #bd0026"></i>
-        </span>
-        <span class="heading legenda-text">Área de maior temperatura</span>
-      </div>
-
-      <div class="container legenda-item">
-        <span class="icon">
-          <i class="far fa-circle fa-2x" style="color:#ffffb2"></i>
-        </span>
-        <span class="heading legenda-text" >Área de menor temperatura</span>
-      </div>-->
 
       <div (click)="onClickIconeEstacao(4)" class="container legenda-item">
         <span class="icon">

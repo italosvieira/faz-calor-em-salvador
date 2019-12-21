@@ -20,6 +20,17 @@ export class MapaComponent implements OnInit, AfterViewInit {
 
   filtro: FiltroModel;
   filtroCampos: FiltroCamposModel;
+  isLoadingPage: boolean;
+  isDisabledFiltros: boolean;
+
+  isLoadingData: boolean;
+  isLoadingBairro: boolean;
+  isLoadingIntervalo: boolean;
+  isLoadingVisualizacao: boolean;
+
+
+  isLoadingButtons: boolean;
+  isDisabledButtons: boolean;
 
   dataOptions: IAngularMyDpOptions = {
     dateRange: false,
@@ -32,9 +43,6 @@ export class MapaComponent implements OnInit, AfterViewInit {
   // TODO desabilitar datas que não tem no banco
   /*disableSince*/
   /*disableUntil*/
-
-  // Camadas do mapa
-  /*['#ffffb2','#fed976','#feb24c','#fd8d3c','#f03b20','#bd0026']*/
   mapa: Map;
   mapaBairro;
   mapaCirculo: Circle;
@@ -43,14 +51,23 @@ export class MapaComponent implements OnInit, AfterViewInit {
   cabecalhoPaletaDeTemperatura;
 
   ngOnInit(): void {
+    this.isLoadingPage = true;
+    this.isLoadingButtons = true;
+    this.isDisabledButtons = true;
+    this.isDisabledFiltros = true;
     this.filtro = new FiltroModel();
     this.filtroCampos = new FiltroCamposModel();
 
     this.service.getFiltro().subscribe((filtroCampos: FiltroCamposModel) => {
       this.filtroCampos = filtroCampos;
       this.inicializarFiltro();
-    }, error => {{
-      console.log(error);
+      this.isLoadingPage = false;
+      this.isLoadingButtons = false;
+      this.isDisabledButtons = false;
+      this.isDisabledFiltros = false;
+    }, () => {{
+      this.isLoadingPage = false;
+      this.isLoadingButtons = false;
     }});
   }
 
@@ -90,11 +107,13 @@ export class MapaComponent implements OnInit, AfterViewInit {
     });
 
     marker([-12.808222, -38.495944], {icon:  iconeEstacaoRadioMarinha}).addTo(this.mapa)
-      .bindPopup('Estação Automática Rádio Marinha');
+      .bindPopup(`Estação automática de coleta de dados metereológicos rádio marinha.
+                          Estes são dados brutos e sem consistência, mas disponíveis de forma imediata.`);
     marker([-13.005515, -38.505760], {icon:  iconeEstacaoAutomatica}).addTo(this.mapa)
-      .bindPopup('Estação Automática Ondina');
+      .bindPopup(`Estação automática de coleta de dados metereológicos Ondina.
+                          Estes são dados brutos e sem consistência, mas disponíveis de forma imediata.`);
     marker([-13.005768, -38.505825], {icon:  iconeEstacaoConvencional}).addTo(this.mapa)
-      .bindPopup('Estação Convencional Ondina');
+      .bindPopup(`Estação convencional de coleta de dados metereológicos Ondina.`);
   }
 
   private limparLayersMapa(): void {
@@ -133,19 +152,6 @@ export class MapaComponent implements OnInit, AfterViewInit {
   }
 
   private adicionarLayerPontosNoMapa(data: any): void {
-    /*const iconeTemperatura = divIcon({
-      html: `
-        <span class="icon">
-            <div>
-              <span style="color: black; font-weight: bold; font-size: 16px;">32.89°C</span><i class="fas fa-sun fa-2x" style="display: inline; color: #f9d71c;"></i>
-              <span style="color: black; font-weight: bold; font-size: 16px;">32.89°C</span><i class="fas fa-moon fa-2x" style="display: inline; color: #adc6ff;"></i>
-            </div>
-          <i class="fas fa-temperature-high fa-4x" style="color: red;"></i>
-        </span>
-      `,
-      className: 'mapa-icone-marker'
-    });*/
-
     for (const ponto of data.pontos) {
       const iconeTemperatura = divIcon({
         html: `
@@ -166,24 +172,6 @@ export class MapaComponent implements OnInit, AfterViewInit {
         }
       });
 
-      /*layer.bindPopup(
-        `
-            <div class="box">
-            <div class="has-text-centered is-size-5 has-text-weight-semibold">Manhã</div><br>
-              <div class="is-size-7">
-                  Temperatura: ${ponto.properties.temperaturadia ? ponto.properties.temperaturadia + '°C' : '--'}<br>
-                  Hora: ${ponto.properties.horadia ? ponto.properties.horadia + 'h' : '--'}
-                </div>
-            </div>
-            <div class="box">
-            <div class="has-text-centered is-size-5 has-text-weight-semibold">Noite</div><br>
-                <div class="is-size-7">
-                  Temperatura: ${ponto.properties.temperaturanoite ? ponto.properties.temperaturanoite + '°C' : '--'}<br>
-                  Hora: ${ponto.properties.horanoite ? ponto.properties.horanoite + 'h' : '--'}
-                </div>
-            </div>
-          `);*/
-
       layer.on('click', () => {
         const circleLayer = circle([ponto.geometry.coordinates[1], ponto.geometry.coordinates[0]], {
           color: 'red',
@@ -191,7 +179,6 @@ export class MapaComponent implements OnInit, AfterViewInit {
           fillOpacity: 0.5,
           radius: 1000
         });
-        console.log('Aqui');
 
         if (this.mapaCirculo) {
           this.mapa.removeLayer(this.mapaCirculo);
@@ -209,19 +196,16 @@ export class MapaComponent implements OnInit, AfterViewInit {
         }
       });
 
-      /*layer.getPopup().on('remove', () => {
-        if (this.mapaCirculo) {
-          this.mapa.removeLayer(this.mapaCirculo);
-          this.mapaCirculo = null;
-        }
-      });*/
-
       layer.addTo(this.mapa);
       this.mapaPontos.push(layer);
     }
   }
 
   onClickIconeEstacao(estacao: number) {
+    if (this.isLoadingPage) {
+      return;
+    }
+
     if (estacao === 1) {
       this.mapa.flyTo({ lat: -12.808222, lng: -38.495944}, 16);
     } else if (estacao === 2) {
@@ -236,6 +220,7 @@ export class MapaComponent implements OnInit, AfterViewInit {
   }
 
   filtrar(): void {
+    this.isLoadingButtons = true;
     this.scrollToView('map');
 
     this.service.postFiltro(this.filtro).subscribe((data: any) => {
@@ -243,8 +228,9 @@ export class MapaComponent implements OnInit, AfterViewInit {
       this.adicionarLayerCabecalhoTopo(data);
       this.adicionarLayerBairroNoMapa(data);
       this.adicionarLayerPontosNoMapa(data);
-    }, error => {
-      console.log(error);
+      this.isLoadingButtons = false;
+    }, () => {
+      this.isLoadingButtons = false;
     });
   }
 
@@ -253,7 +239,6 @@ export class MapaComponent implements OnInit, AfterViewInit {
   }
 
   adicionarLayerCabecalhoTopo(data: any): void {
-    console.log(data);
     this.cabecalhoTemperaturaCidade = new Control({position: 'topright'});
     this.cabecalhoTemperaturaCidade.onAdd = () =>  {
       const div = DomUtil.create('div', '');
@@ -304,37 +289,6 @@ export class MapaComponent implements OnInit, AfterViewInit {
     this.cabecalhoTemperaturaCidade.addTo(this.mapa);
   }
 
-  /*metodoAdd(): HTMLElement {
-    // tslint:disable-next-line:one-variable-per-declaration
-    const div = DomUtil.create('div', 'info-batata legend-batata'),
-      grades = [0, 10, 20, 50, 100, 200, 500, 1000],
-      labels = [];
-
-    // loop through our density intervals and generate a label with a colored square for each interval
-    for (let i = 0; i < grades.length; i++) {
-      div.innerHTML +=
-        '<i style="background:' + this.getColor(grades[i] + 1) + '"></i> ' +
-        grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
-    }
-
-    return div;
-  }*/
-
-  /*getColor(i) {
-    return 'black';
-  }*/
-
-  getColor(d) {
-    return d > 1000 ? '#800026' :
-      d > 500  ? '#BD0026' :
-        d > 200  ? '#E31A1C' :
-          d > 100  ? '#FC4E2A' :
-            d > 50   ? '#FD8D3C' :
-              d > 20   ? '#FEB24C' :
-                d > 10   ? '#FED976' :
-                  '#FFEDA0';
-  }
-
   private montarDateModel(myDate: IMyDate) {
     const date = myDate ? new Date(myDate.year + '-' + myDate.month + '-' + myDate.day) : new Date();
 
@@ -355,6 +309,8 @@ export class MapaComponent implements OnInit, AfterViewInit {
   }
 
   onChangeVisualizacao(): void {
+    this.isDisabledButtons = true;
+    this.isLoadingIntervalo = true;
     this.filtroCampos.dias = null;
     this.filtroCampos.intervalos = null;
 
@@ -362,12 +318,19 @@ export class MapaComponent implements OnInit, AfterViewInit {
       this.service.getDiasDisponiveis(this.filtro.bairro.id).subscribe((dias: Array<IMyDate>) => {
         this.filtroCampos.dias = dias;
         this.filtro.data = this.montarDateModel(dias[0]);
+        this.isDisabledButtons = false;
+        this.isLoadingIntervalo = false;
+      }, () => {
+        this.isDisabledButtons = false;
       });
     } else {
       this.service.getIntervalos(this.filtro.bairro.id).subscribe((intervalos: Array<IntervaloModel>) => {
-        console.log(intervalos);
         this.filtroCampos.intervalos = intervalos;
         this.filtro.intervalo = intervalos ? intervalos[0] : null;
+        this.isDisabledButtons = false;
+        this.isLoadingIntervalo = false;
+      }, () => {
+        this.isDisabledButtons = false;
       });
     }
   }
@@ -377,20 +340,26 @@ export class MapaComponent implements OnInit, AfterViewInit {
     this.filtro.data = this.montarDateModel(this.filtroCampos.dias ? this.filtroCampos.dias[0] : null);
     this.filtro.bairro = this.filtroCampos.bairros ? this.filtroCampos.bairros[0] : null;
     this.filtro.visualizacao = this.filtroCampos.visualizacoes ? this.filtroCampos.visualizacoes[0] : null;
-    this.dataOptions = {
-      dateRange: false,
-      dateFormat: 'dd/mm/yyyy',
-      dayLabels: {su: 'Dom', mo: 'Seg', tu: 'Ter', we: 'Qua', th: 'Qui', fr: 'Sex', sa: 'Sáb'},
-      monthLabels: {1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril', 5: 'Maio', 6: 'Junho',
-        7: 'Julho', 8: 'Agosto', 9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'},
-      enableDates: this.filtroCampos.dias
-    };
+    this.dataOptions.enableDates = this.filtroCampos.dias;
   }
 
   limpar(): void {
-    this.inicializarFiltro();
+    this.isLoadingButtons = true;
     this.limparLayersMapa();
     this.scrollToView('filtro');
+
+    this.filtro = new FiltroModel();
+    this.filtro.visualizacao = this.filtroCampos.visualizacoes ? this.filtroCampos.visualizacoes[0] : null;
+    this.filtro.bairro = this.filtroCampos.bairros ? this.filtroCampos.bairros[0] : null;
+
+    this.service.getDiasDisponiveis(this.filtro.bairro.id).subscribe((dias: Array<IMyDate>) => {
+      this.filtroCampos.dias = dias;
+      this.dataOptions.enableDates = dias;
+      this.filtro.data = this.montarDateModel(dias[0]);
+      this.isLoadingButtons = false;
+    }, () => {
+      this.isLoadingButtons = false;
+    });
   }
 
   private scrollToView(id: string): void {
