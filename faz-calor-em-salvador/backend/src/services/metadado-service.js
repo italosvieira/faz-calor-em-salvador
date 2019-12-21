@@ -6,14 +6,14 @@ module.exports = {
   getIntervalos: async function (bairroId) {
     return (await pool.query({
       text:
-          `select distinct to_char(md.data_inicio_colecao, 'DD/MM/YYYY') as inicio,
-                           to_char(md.data_fim_colecao, 'DD/MM/YYYY') as fim
+          `select to_char(md.data_inicio_colecao, 'DD/MM/YYYY') as inicio,
+                  to_char(md.data_fim_colecao, 'DD/MM/YYYY') as fim
         from lstd_metadados md
         inner join lstd_dados_cientificos dc on md.id = dc.id_metadados
         where md.data_inicio_colecao is not null
         and md.data_fim_colecao is not null
         and dc.id_bairro = $1
-        order by fim desc
+        order by md.data_fim_colecao desc
       `,
       values: [bairroId]
     })).rows
@@ -21,7 +21,7 @@ module.exports = {
   getDiasDisponiveis: async function (bairroId) {
     return (await pool.query({
       text: `
-        select distinct md.data_inicio_colecao as dia
+        select md.data_inicio_colecao as dia
         from lstd_metadados md
         inner join lstd_dados_cientificos dc on md.id = dc.id_metadados
         where md.data_inicio_colecao is not null

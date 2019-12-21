@@ -62,13 +62,17 @@ function validarRequest (body) {
       throw new BusinessException('data.singleDate.formatted null ou undefined', 'Request inválido. data.singleDate.formatted não pode ser null ou undefined no modo visualizao Dia a dia', 400)
     }
 
-    if (!moment(body.data.singleDate.formatted).isValid()) {
+    if (!moment(body.data.singleDate.jsDate).isValid()) {
       throw new BusinessException('data.singleDate.formatted não está em uma formato válido', 'Request inválido. data.singleDate.formatted está em um formato inválido no modo visualizao Dia a dia', 400)
     }
 
     try {
-      moment(body.data.singleDate.formatted).format('DD/MM/YYYY')
+      moment(body.data.singleDate.jsDate).format('DD/MM/YYYY')
     } catch (e) {
+      throw new BusinessException('data.singleDate.formatted não está em uma formato válido', 'Request inválido. data.singleDate.formatted está em um formato inválido no modo visualizao Dia a dia', 400)
+    }
+
+    if (moment(body.data.singleDate.jsDate).format('DD/MM/YYYY') !== body.data.singleDate.formatted) {
       throw new BusinessException('data.singleDate.formatted não está em uma formato válido', 'Request inválido. data.singleDate.formatted está em um formato inválido no modo visualizao Dia a dia', 400)
     }
   }
