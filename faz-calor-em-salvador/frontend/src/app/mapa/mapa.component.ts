@@ -7,6 +7,7 @@ import {DatePipe} from '@angular/common';
 import {MapaService} from './mapa.service';
 import {FiltroCamposModel} from '../model/filtro-campos.model';
 import {IntervaloModel} from '../model/intervalo.model';
+import layers = control.layers;
 
 @Component({
   selector: 'app-mapa',
@@ -41,6 +42,8 @@ export class MapaComponent implements OnInit, AfterViewInit {
   mapaPontos = [];
   cabecalhoTemperaturaCidade;
   cabecalhoPaletaDeTemperatura;
+  layerOpenStreetMap;
+  layerSalvadorOrtogonal;
 
   ngOnInit(): void {
     this.isLoadingPage = true;
@@ -75,13 +78,29 @@ export class MapaComponent implements OnInit, AfterViewInit {
       zoomControl: false
     });
 
-    const tiles = tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    this.layerSalvadorOrtogonal = tileLayer.wms('http://mapeamento.salvador.ba.gov.br/wms', {
+      layers: 'Ortoimagem_Salvador_2016_2017'
+    });
+
+    this.layerOpenStreetMap = tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
 
+    const basemaps = {
+      'Salvador Ortogonal': tileLayer.wms('http://mapeamento.salvador.ba.gov.br/wms', {
+        layers: 'Ortoimagem_Salvador_2016_2017'
+      }),
+
+      'Open Street Map': tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      })
+    };
+
     control.scale().addTo(this.mapa);
-    tiles.addTo(this.mapa);
+    layers(basemaps, {}, { position: 'bottomright' }).addTo(this.mapa);
+    basemaps['Salvador Ortogonal'].addTo(this.mapa);
 
     const iconeEstacaoRadioMarinha = divIcon({
       html: `<i class="fas fa-broadcast-tower fa-2x"></i>`,
@@ -158,6 +177,16 @@ export class MapaComponent implements OnInit, AfterViewInit {
     return `<i class="fas fa-thermometer-full fa-4x" style="color: red;"></i>`;
   }
 
+  private obterMargem(isDia, temperaturaDia, temperaturaNoite): string {
+    if (!temperaturaDia && temperaturaNoite) {
+      return isDia ? 'margin-left: 48px;' : '';
+    }
+
+    if (temperaturaDia && !temperaturaNoite) {
+      return !isDia ? 'margin-left: 48px;' : '';
+    }
+  }
+
   private adicionarLayerPontosNoMapa(data: any): void {
     let count = 0;
 
@@ -166,8 +195,8 @@ export class MapaComponent implements OnInit, AfterViewInit {
         html: `
         <span class="icon">
             <div>
-              <span style="color: black; font-weight: bold; font-size: 16px;">${ponto.properties.temperaturadia ? ponto.properties.temperaturadia + '°C' : '--'}</span><i class="fas fa-sun fa-2x" style="display: inline; color: #f9d71c;"></i>
-              <span style="color: black; font-weight: bold; font-size: 16px;">${ponto.properties.temperaturanoite ? ponto.properties.temperaturanoite + '°C' : '--'}</span><i class="fas fa-moon fa-2x" style="display: inline; color: #adc6ff;"></i>
+              <span style="color: black; font-weight: bold; font-size: 16px; ${this.obterMargem(true, ponto.properties.temperaturadia, ponto.properties.temperaturanoite)}">${ponto.properties.temperaturadia ? ponto.properties.temperaturadia + '°C' : '--'}</span><i class="fas fa-sun fa-2x" style="display: inline; color: #f9d71c;"></i>
+              <span style="color: black; font-weight: bold; font-size: 16px; ${this.obterMargem(false, ponto.properties.temperaturadia, ponto.properties.temperaturanoite)}">${ponto.properties.temperaturanoite ? ponto.properties.temperaturanoite + '°C' : '--'}</span><i class="fas fa-moon fa-2x" style="display: inline; color: #adc6ff;"></i>
             </div>
           ${this.obterIconeTemperatura(count)}
         </span>
