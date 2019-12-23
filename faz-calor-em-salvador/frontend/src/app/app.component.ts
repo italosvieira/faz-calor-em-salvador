@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {NavigationEnd, Router} from '@angular/router';
+import {Router} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 
@@ -12,11 +12,11 @@ export class AppComponent implements OnInit {
   constructor(private router: Router, private breakpointObserver: BreakpointObserver, private sanitizer: DomSanitizer) {}
 
   // Classes
-  tamanhoTabs;
+  /*tamanhoTabs;*/
   tamanhoBanner;
 
   banner;
-  abaSelecionada;
+  /*abaSelecionada;*/
 
   getBackGround() {
     return this.sanitizer.bypassSecurityTrustStyle(`url(/assets/images/${this.banner})`);
@@ -24,7 +24,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.banner = 'banner2.jpg';
-    this.abaSelecionada = 1;
+    /*this.abaSelecionada = 1;*/
     /*this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         if (event.url === '/') {
@@ -51,31 +51,31 @@ export class AppComponent implements OnInit {
       if (result.breakpoints[Breakpoints.XSmall]) {
         /*console.log('Is XSmall');*/
         this.tamanhoBanner = 'is-medium';
-        this.tamanhoTabs = 'is-small';
+        /*this.tamanhoTabs = 'is-small';*/
         // max-width = 599.99px
       }
       if (result.breakpoints[Breakpoints.Small]) {
         /*console.log('Is Small');*/
         this.tamanhoBanner = 'is-medium';
-        this.tamanhoTabs = 'is-medium';
+        /*this.tamanhoTabs = 'is-medium';*/
         // min-width = 600px and max-width = 959.99px
       }
       if (result.breakpoints[Breakpoints.Medium]) {
         /*console.log('Is Medium');*/
         this.tamanhoBanner = 'is-medium';
-        this.tamanhoTabs = 'is-medium';
+        /*this.tamanhoTabs = 'is-medium';*/
         // 960px and max-width = 1279.99px
       }
       if (result.breakpoints[Breakpoints.Large]) {
         /*console.log('Is Large');*/
         this.tamanhoBanner = 'is-medium';
-        this.tamanhoTabs = 'is-medium';
+        /*this.tamanhoTabs = 'is-medium';*/
         // 1280px and max-width = 1919.99px
       }
       if (result.breakpoints[Breakpoints.XLarge]) {
         /*console.log('Is XLarge');*/
         this.tamanhoBanner = 'is-large';
-        this.tamanhoTabs = 'is-large';
+        /*this.tamanhoTabs = 'is-large';*/
         // 1920px
       }
     });
@@ -123,7 +123,7 @@ export class AppComponent implements OnInit {
   //   }
   }
 
-  async selecionarAba(aba: number) {
+  /*async selecionarAba(aba: number) {
     if (aba) {
       if (aba === 1) {
         this.abaSelecionada = 1;
@@ -142,5 +142,5 @@ export class AppComponent implements OnInit {
 
     this.abaSelecionada = 1;
     await this.router.navigate(['']);
-  }
+  }*/
 }
