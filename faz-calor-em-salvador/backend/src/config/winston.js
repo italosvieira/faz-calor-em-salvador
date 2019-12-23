@@ -1,4 +1,5 @@
 const winston = require('winston')
+const moment = require('moment')
 
 module.exports = winston.createLogger({
   level: 'info',
@@ -10,7 +11,8 @@ module.exports = winston.createLogger({
     winston.format.colorize(),
     winston.format.timestamp(),
     winston.format.printf(({ level, message, timestamp, stack }) => {
-      return stack ? `[${timestamp}] ${level}: ${message} \n ${stack}` : `[${timestamp}] ${level}: ${message}`
+      return stack ? `[${moment(timestamp).format('DD/MM/YYYY HH:mm:ss')}] ${level}: ${message} \n ${stack}`
+        : `[${moment(timestamp).format('DD/MM/YYYY HH:mm:ss')}] ${level}: ${message}`
     })
   ),
   transports: [new winston.transports.Console()]
