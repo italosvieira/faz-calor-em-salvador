@@ -23,8 +23,8 @@
     <div *ngIf="filtro.visualizacao === 'Semanal'" class="control has-icons-left max-width-100">
       <label class="label">Intervalo</label>
       <div class="select is-rounded" [ngClass]="isLoadingPage || isLoadingIntervalo === true ? 'is-loading' : '' ">
-        <select [(ngModel)]="filtro.intervalo" [disabled]="isDisabledFiltros || isLoadingIntervalo">
-          <option *ngFor="let intervalo of filtroCampos.intervalos" [ngValue]="intervalo">{{ intervalo.inicio }} até {{ intervalo.fim }}</option>
+        <select [(ngModel)]="filtro.intervalo" [disabled]="isDisabledFiltros || isLoadingIntervalo || isDisabledIntervalo">
+          <option *ngFor="let intervalo of filtroCampos.intervalos" [ngValue]="intervalo">{{ montarTextoIntervalo(intervalo) }}</option>
         </select>
         <span class="icon"><i class="fas fa-calendar-alt"></i></span>
       </div>
@@ -44,7 +44,7 @@
   <div class="field is-grouped is-grouped-centered">
     <div class="control">
       <button (click)="filtrar()" class="button is-hovered is-link is-rounded"
-              [ngClass]="isLoadingButtons === true ? 'is-loading' : '' " [disabled]="isDisabledButtons">
+              [ngClass]="isLoadingButtons === true ? 'is-loading' : '' " [disabled]="isDisabledButtons || isDisabledIntervalo">
         <span class="icon"><i class="fas fa-filter"></i></span>
         <span>Filtrar</span>
       </button>

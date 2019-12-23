@@ -22,13 +22,8 @@ export class MapaComponent implements OnInit, AfterViewInit {
   filtroCampos: FiltroCamposModel;
   isLoadingPage: boolean;
   isDisabledFiltros: boolean;
-
-  isLoadingData: boolean;
-  isLoadingBairro: boolean;
   isLoadingIntervalo: boolean;
-  isLoadingVisualizacao: boolean;
-
-
+  isDisabledIntervalo: boolean;
   isLoadingButtons: boolean;
   isDisabledButtons: boolean;
 
@@ -113,7 +108,8 @@ export class MapaComponent implements OnInit, AfterViewInit {
       .bindPopup(`Estação automática de coleta de dados metereológicos Ondina.
                           Estes são dados brutos e sem consistência, mas disponíveis de forma imediata.`);
     marker([-13.005768, -38.505825], {icon:  iconeEstacaoConvencional}).addTo(this.mapa)
-      .bindPopup(`Estação convencional de coleta de dados metereológicos Ondina.`);
+      .bindPopup(`Estação convencional de coleta de dados metereológicos Ondina.
+                          Estes são dados manualmente aferidos e de alta fidelidade.`);
   }
 
   private limparLayersMapa(): void {
@@ -243,17 +239,33 @@ export class MapaComponent implements OnInit, AfterViewInit {
     this.cabecalhoTemperaturaCidade.onAdd = () =>  {
       const div = DomUtil.create('div', '');
 
-      const estacaoAutomaticaTempInst = this.obterTemperaturaTruncada(data.estacaoAutomatica.mediaTemperaturaManha.temperaturainst);
-      const estacaoAutomaticaTempMax = this.obterTemperaturaTruncada(data.estacaoAutomatica.mediaTemperaturaManha.temperaturamax);
-      const estacaoAutomaticaTempMin = this.obterTemperaturaTruncada(data.estacaoAutomatica.mediaTemperaturaManha.temperaturamin);
+      let estacaoAutomaticaTempInst = '--';
+      let estacaoAutomaticaTempMax = '--';
+      let estacaoAutomaticaTempMin = '--';
+      let estacaoAutomaticaRadioMarinhaTempInst = '--';
+      let estacaoAutomaticaRadioMarinhaTempMax = '--';
+      let estacaoAutomaticaRadioMarinhaTempMin = '--';
+      let estacaoConvencionalTempInst = '--';
+      let estacaoConvencionalTempMax = '--';
+      let estacaoConvencionalTempMin = '--';
 
-      const estacaoAutomaticaRadioMarinhaTempInst = this.obterTemperaturaTruncada(data.estacaoAutomaticaRadioMarinha.mediaTemperaturaManha.temperaturainst);
-      const estacaoAutomaticaRadioMarinhaTempMax = this.obterTemperaturaTruncada(data.estacaoAutomaticaRadioMarinha.mediaTemperaturaManha.temperaturamax);
-      const estacaoAutomaticaRadioMarinhaTempMin = this.obterTemperaturaTruncada(data.estacaoAutomaticaRadioMarinha.mediaTemperaturaManha.temperaturamin);
+      if (data.estacaoAutomatica && data.estacaoAutomatica.mediaTemperaturaManha) {
+        estacaoAutomaticaTempInst = this.obterTemperaturaTruncada(data.estacaoAutomatica.mediaTemperaturaManha.temperaturainst);
+        estacaoAutomaticaTempMax = this.obterTemperaturaTruncada(data.estacaoAutomatica.mediaTemperaturaManha.temperaturamax);
+        estacaoAutomaticaTempMin = this.obterTemperaturaTruncada(data.estacaoAutomatica.mediaTemperaturaManha.temperaturamin);
+      }
 
-      const estacaoConvencionalTempInst = this.obterTemperaturaTruncada(data.estacaoConvencional.mediaTemperaturaManha.temperaturamin);
-      const estacaoConvencionalTempMax = this.obterTemperaturaTruncada(data.estacaoConvencional.mediaTemperaturaManha.temperaturamax);
-      const estacaoConvencionalTempMin = this.obterTemperaturaTruncada(data.estacaoConvencional.mediaTemperaturaManha.temperaturamin);
+      if (data.estacaoAutomaticaRadioMarinha && data.estacaoAutomaticaRadioMarinha.mediaTemperaturaManha) {
+        estacaoAutomaticaRadioMarinhaTempInst = this.obterTemperaturaTruncada(data.estacaoAutomaticaRadioMarinha.mediaTemperaturaManha.temperaturainst);
+        estacaoAutomaticaRadioMarinhaTempMax = this.obterTemperaturaTruncada(data.estacaoAutomaticaRadioMarinha.mediaTemperaturaManha.temperaturamax);
+        estacaoAutomaticaRadioMarinhaTempMin = this.obterTemperaturaTruncada(data.estacaoAutomaticaRadioMarinha.mediaTemperaturaManha.temperaturamin);
+      }
+
+      if (data.estacaoConvencional && data.estacaoConvencional.mediaTemperaturaManha) {
+        estacaoConvencionalTempInst = this.obterTemperaturaTruncada(data.estacaoConvencional.mediaTemperaturaManha.temperaturamin);
+        estacaoConvencionalTempMax = this.obterTemperaturaTruncada(data.estacaoConvencional.mediaTemperaturaManha.temperaturamax);
+        estacaoConvencionalTempMin = this.obterTemperaturaTruncada(data.estacaoConvencional.mediaTemperaturaManha.temperaturamin);
+      }
 
       div.innerHTML = `
         <div class="box">
@@ -311,6 +323,7 @@ export class MapaComponent implements OnInit, AfterViewInit {
   onChangeVisualizacao(): void {
     this.isDisabledButtons = true;
     this.isLoadingIntervalo = true;
+    this.isDisabledIntervalo = true;
     this.filtroCampos.dias = null;
     this.filtroCampos.intervalos = null;
 
@@ -325,8 +338,17 @@ export class MapaComponent implements OnInit, AfterViewInit {
       });
     } else {
       this.service.getIntervalos(this.filtro.bairro.id).subscribe((intervalos: Array<IntervaloModel>) => {
-        this.filtroCampos.intervalos = intervalos;
-        this.filtro.intervalo = intervalos ? intervalos[0] : null;
+        if (intervalos && intervalos.length > 0) {
+          this.filtroCampos.intervalos = intervalos;
+          this.filtro.intervalo = intervalos ? intervalos[0] : null;
+          this.isDisabledIntervalo = false;
+        } else {
+          this.filtroCampos.intervalos = [];
+          const placeholder = {inicio: 'placeholder', fim: 'placeholder'};
+          this.filtroCampos.intervalos.push(placeholder);
+          this.filtro.intervalo = placeholder;
+          this.isDisabledIntervalo = true;
+        }
         this.isDisabledButtons = false;
         this.isLoadingIntervalo = false;
       }, () => {
@@ -335,15 +357,22 @@ export class MapaComponent implements OnInit, AfterViewInit {
     }
   }
 
+  montarTextoIntervalo(intervalo: IntervaloModel | null): string {
+    return intervalo && intervalo.inicio !== 'placeholder' ? intervalo.inicio + ' até ' + intervalo.fim : 'Não existe intervalo para esse Bairro';
+  }
+
   private inicializarFiltro(): void {
     this.filtro = new FiltroModel();
     this.filtro.data = this.montarDateModel(this.filtroCampos.dias ? this.filtroCampos.dias[0] : null);
     this.filtro.bairro = this.filtroCampos.bairros ? this.filtroCampos.bairros[0] : null;
     this.filtro.visualizacao = this.filtroCampos.visualizacoes ? this.filtroCampos.visualizacoes[0] : null;
+    this.dataOptions.maxYear = this.filtroCampos.dias[0].year;
+    this.dataOptions.minYear = this.filtroCampos.dias[this.filtroCampos.dias.length - 1].year;
     this.dataOptions.enableDates = this.filtroCampos.dias;
   }
 
   limpar(): void {
+    this.isDisabledIntervalo = false;
     this.isLoadingButtons = true;
     this.limparLayersMapa();
     this.scrollToView('filtro');
