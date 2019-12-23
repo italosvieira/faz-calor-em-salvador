@@ -12,7 +12,7 @@ module.exports = {
           from lstd_dados_cientificos dc inner join lstd_metadados md on dc.id_metadados = md.id 
           where dc.id_bairro = $1 and md.nome_dataset = 'MOD11A2' 
           and TO_DATE($2, 'DD/MM/YYYY') = md.data_inicio_colecao and TO_DATE($3, 'DD/MM/YYYY') = md.data_fim_colecao 
-          order by temperatura_dia desc `,
+          order by temperatura_dia asc `,
       values: [bairroId, dataInicio, dataFim]
     })).rows
   },
@@ -33,7 +33,7 @@ module.exports = {
           from lstd_dados_cientificos dc inner join lstd_metadados md on dc.id_metadados = md.id 
           where dc.id_bairro = $1 and md.nome_dataset = 'MOD11A1' 
           and TO_DATE($2, 'DD/MM/YYYY') = md.data_inicio_colecao  
-          order by temperatura_dia desc `,
+          order by temperatura_dia asc `,
       values: [bairroId, dataMedicao]
     })).rows
   },
