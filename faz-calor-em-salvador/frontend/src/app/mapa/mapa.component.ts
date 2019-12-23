@@ -35,9 +35,6 @@ export class MapaComponent implements OnInit, AfterViewInit {
                   7: 'Julho', 8: 'Agosto', 9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'}
   };
 
-  // TODO desabilitar datas que não tem no banco
-  /*disableSince*/
-  /*disableUntil*/
   mapa: Map;
   mapaBairro;
   mapaCirculo: Circle;
@@ -73,7 +70,7 @@ export class MapaComponent implements OnInit, AfterViewInit {
   private inicializarMapa(): void {
     this.mapa = new Map('map', {
       center: [-12.8382471753411741, -38.38245391845703],
-      zoom: 13,
+      zoom: 11,
       attributionControl: false,
       zoomControl: false
     });
@@ -147,7 +144,23 @@ export class MapaComponent implements OnInit, AfterViewInit {
     this.mapa.flyToBounds(this.mapaBairro.getBounds());
   }
 
+  private obterIconeTemperatura(numero: number) {
+    if (numero === 0) {
+      return `<i class="fas fa-thermometer-empty fa-4x" style="color: red;"></i>`;
+    } else if (numero === 1) {
+      return `<i class="fas fa-thermometer-quarter fa-4x" style="color: red;"></i>`;
+    } else if (numero === 2) {
+      return `<i class="fas fa-thermometer-half fa-4x" style="color: red;"></i>`;
+    } else if (numero === 3) {
+      return `<i class="fas fa-thermometer-three-quarters fa-4x" style="color: red;"></i>`;
+    }
+
+    return `<i class="fas fa-thermometer-full fa-4x" style="color: red;"></i>`;
+  }
+
   private adicionarLayerPontosNoMapa(data: any): void {
+    let count = 0;
+
     for (const ponto of data.pontos) {
       const iconeTemperatura = divIcon({
         html: `
@@ -156,7 +169,7 @@ export class MapaComponent implements OnInit, AfterViewInit {
               <span style="color: black; font-weight: bold; font-size: 16px;">${ponto.properties.temperaturadia ? ponto.properties.temperaturadia + '°C' : '--'}</span><i class="fas fa-sun fa-2x" style="display: inline; color: #f9d71c;"></i>
               <span style="color: black; font-weight: bold; font-size: 16px;">${ponto.properties.temperaturanoite ? ponto.properties.temperaturanoite + '°C' : '--'}</span><i class="fas fa-moon fa-2x" style="display: inline; color: #adc6ff;"></i>
             </div>
-          <i class="fas fa-temperature-high fa-4x" style="color: red;"></i>
+          ${this.obterIconeTemperatura(count)}
         </span>
       `,
         className: 'mapa-icone-marker'
@@ -192,6 +205,7 @@ export class MapaComponent implements OnInit, AfterViewInit {
         }
       });
 
+      count++;
       layer.addTo(this.mapa);
       this.mapaPontos.push(layer);
     }
