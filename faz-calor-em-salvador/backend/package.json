@@ -9,14 +9,14 @@
   },
   "dependencies": {
     "@koa/cors": "3.0.0",
-    "geojson": "^0.5.0",
+    "geojson": "0.5.0",
     "koa": "2.11.0",
     "koa-bodyparser": "4.2.1",
     "koa-helmet": "5.2.0",
     "koa-logger": "3.2.1",
     "koa-response-time": "2.1.0",
     "koa-router": "7.4.0",
-    "moment": "^2.24.0",
+    "moment": "2.24.0",
     "pg": "7.14.0",
     "winston": "3.2.1"
   },
