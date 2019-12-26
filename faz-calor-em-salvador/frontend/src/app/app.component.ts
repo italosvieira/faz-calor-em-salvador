@@ -23,7 +23,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.banner = 'banner2.jpg';
+    this.banner = 'banner.jpg';
     /*this.abaSelecionada = 1;*/
     /*this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
